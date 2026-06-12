@@ -3,30 +3,30 @@
 :root {
   --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
-  /* Color Palette */
-  --bg-primary: #0a0b10;
-  --bg-secondary: #12131a;
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.06);
-  --card-border-hover: rgba(255, 255, 255, 0.15);
+  /* Color Palette - Light Mode */
+  --bg-primary: #f4f5f8;
+  --bg-secondary: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.65);
+  --card-border: rgba(0, 0, 0, 0.07);
+  --card-border-hover: rgba(99, 102, 241, 0.25);
   
-  --text-primary: #f8f9fa;
-  --text-secondary: #9ea2b0;
-  --text-muted: #626575;
+  --text-primary: #1e293b;
+  --text-secondary: #57607a;
+  --text-muted: #8c93a8;
   
-  --accent-primary: #6366f1; /* Indigo */
-  --accent-primary-hover: #4f46e5;
-  --accent-success: #10b981; /* Emerald */
-  --accent-success-hover: #059669;
-  --accent-warning: #f59e0b; /* Amber */
-  --accent-danger: #ef4444; /* Rose */
-  --accent-danger-hover: #dc2626;
+  --accent-primary: #4f46e5; /* Rich Indigo */
+  --accent-primary-hover: #3730a3;
+  --accent-success: #059669; /* Emerald */
+  --accent-success-hover: #047857;
+  --accent-warning: #d97706; /* Amber */
+  --accent-danger: #e11d48; /* Rose */
+  --accent-danger-hover: #be123c;
   
   /* Shadow & Blur */
-  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-  --glow-indigo: 0 0 20px rgba(99, 102, 241, 0.15);
-  --glow-success: 0 0 20px rgba(16, 185, 129, 0.15);
-  --glow-danger: 0 0 20px rgba(239, 68, 68, 0.15);
+  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  --glow-indigo: 0 4px 20px rgba(99, 102, 241, 0.06);
+  --glow-success: 0 4px 20px rgba(5, 150, 105, 0.06);
+  --glow-danger: 0 4px 20px rgba(225, 29, 72, 0.06);
   --blur-radius: 16px;
   
   /* Transitions */
@@ -48,8 +48,8 @@ body {
   min-height: 100vh;
   line-height: 1.5;
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.04) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.02) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.02) 0%, transparent 40%);
   background-attachment: fixed;
   overflow-y: scroll;
 }
@@ -70,7 +70,7 @@ header {
   font-size: 2.5rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #fff 0%, var(--text-secondary) 100%);
+  background: linear-gradient(135deg, #1e293b 0%, var(--text-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
@@ -135,7 +135,7 @@ header {
 .progress-bar-bg {
   width: 100%;
   height: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 999px;
   overflow: hidden;
   position: relative;
@@ -188,7 +188,7 @@ select {
   width: 100%;
   padding: 12px 16px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.02);
   border: 1px solid var(--card-border);
   color: var(--text-primary);
   font-family: var(--font-primary);
@@ -202,7 +202,7 @@ textarea:focus,
 input[type="date"]:focus,
 select:focus {
   border-color: var(--accent-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: #ffffff;
   box-shadow: var(--glow-indigo);
 }
 
@@ -243,14 +243,14 @@ textarea {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.03);
   color: var(--text-primary);
   border: 1px solid var(--card-border);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.15);
 }
 
 .btn-danger {
@@ -270,7 +270,7 @@ textarea {
 
 .btn-text:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.03);
 }
 
 /* Filter Bar Panel */
@@ -310,7 +310,7 @@ textarea {
 
 .filter-tabs {
   display: flex;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.02);
   border: 1px solid var(--card-border);
   padding: 4px;
   border-radius: 10px;
@@ -330,9 +330,9 @@ textarea {
 }
 
 .filter-tab.active {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .sort-select {
@@ -496,14 +496,14 @@ textarea {
   font-weight: 500;
   padding: 2px 8px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.03);
   color: var(--text-secondary);
 }
 
 .meta-badge.badge-overdue {
-  background: rgba(239, 68, 68, 0.1);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(225, 29, 72, 0.08);
+  color: #be123c;
+  border: 1px solid rgba(225, 29, 72, 0.15);
   box-shadow: var(--glow-danger);
 }
 
@@ -531,13 +531,13 @@ textarea {
 }
 
 .action-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.03);
   color: var(--text-primary);
 }
 
 .action-btn.btn-delete:hover {
   color: var(--accent-danger);
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(225, 29, 72, 0.08);
 }
 
 /* Custom Modal Styling (Confirmation Dialog & Edit Modal) */
@@ -547,7 +547,7 @@ textarea {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(6, 7, 10, 0.8);
+  background: rgba(15, 23, 42, 0.35);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -592,7 +592,7 @@ textarea {
 }
 
 .toast {
-  background: rgba(18, 19, 26, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--card-border);
   border-radius: 10px;
   padding: 12px 20px;
