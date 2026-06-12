@@ -20,15 +20,15 @@ export default function ConfirmationModal({ isOpen, title, message, onConfirm, o
         </div>
         
         <div className="modal-body">
-          <p>{message}</p>
+          <p style={{ fontWeight: '500' }}>{message}</p>
         </div>
         
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onCancel}>
-            Cancel
+            Hold up 🚫
           </button>
           <button className="btn btn-danger" onClick={onConfirm}>
-            Delete
+            Yeet 🗑️
           </button>
         </div>
       </div>

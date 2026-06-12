@@ -26,7 +26,7 @@ export default function TaskForm({ onSubmit, editingTask, onCancel }) {
     e.preventDefault();
 
     if (!title.trim()) {
-      setError('Task title is required');
+      setError('A title is required, no cap');
       return;
     }
 
@@ -52,7 +52,7 @@ export default function TaskForm({ onSubmit, editingTask, onCancel }) {
         <input
           id="task-title"
           type="text"
-          placeholder="What needs to be done?"
+          placeholder="What's the play today?..."
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
@@ -61,14 +61,14 @@ export default function TaskForm({ onSubmit, editingTask, onCancel }) {
           style={error ? { borderColor: 'var(--accent-danger)' } : {}}
           maxLength={100}
         />
-        {error && <span style={{ color: 'var(--accent-danger)', fontSize: '0.8rem', marginTop: '2px' }}>{error}</span>}
+        {error && <span style={{ color: 'var(--accent-danger)', fontSize: '0.8rem', marginTop: '2px', fontWeight: '700' }}>{error}</span>}
       </div>
 
       <div className="form-group">
         <label htmlFor="task-desc">Description</label>
         <textarea
           id="task-desc"
-          placeholder="Add details about this task..."
+          placeholder="Spill the tea / details here..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={500}
@@ -97,7 +97,7 @@ export default function TaskForm({ onSubmit, editingTask, onCancel }) {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="modal-header">
-            <h3 className="form-title" style={{ margin: 0 }}>Edit Task</h3>
+            <h3 className="form-title" style={{ margin: 0 }}>Edit Vibe 📝</h3>
             <button type="button" className="action-btn" onClick={onCancel} aria-label="Cancel editing">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -112,10 +112,10 @@ export default function TaskForm({ onSubmit, editingTask, onCancel }) {
 
           <div className="modal-footer" style={{ marginTop: '8px' }}>
             <button type="button" className="btn btn-secondary" onClick={onCancel}>
-              Cancel
+              Hold up 🚫
             </button>
             <button type="submit" className="btn btn-primary">
-              Save Changes
+              Update Vibe 💫
             </button>
           </div>
         </form>
@@ -126,7 +126,7 @@ export default function TaskForm({ onSubmit, editingTask, onCancel }) {
   // If creating, render inline card
   return (
     <form className="glass-panel task-form" onSubmit={handleSubmit} data-testid="create-task-form">
-      <h3 className="form-title">Add New Task</h3>
+      <h3 className="form-title">Manifest a new vibe ✨</h3>
       
       {formFields}
 
@@ -135,7 +135,7 @@ export default function TaskForm({ onSubmit, editingTask, onCancel }) {
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
-        Add Task
+        Lock it in 🔒
       </button>
     </form>
   );

@@ -43,8 +43,8 @@ describe('App React Component', () => {
     api.fetchTasks.mockResolvedValue([]);
     render(<App />);
 
-    expect(screen.getByText('Task Workspace')).toBeInTheDocument();
-    expect(screen.getByText(/Organize your thoughts/)).toBeInTheDocument();
+    expect(screen.getByText('Workspace Vibes ✨')).toBeInTheDocument();
+    expect(screen.getByText(/Stop slacking, start manifestin/)).toBeInTheDocument();
   });
 
   it('displays the loading state initially', async () => {
@@ -63,8 +63,8 @@ describe('App React Component', () => {
       expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText('No tasks found')).toBeInTheDocument();
-    expect(screen.getByText(/Get started by creating your first task/)).toBeInTheDocument();
+    expect(screen.getByText('No vibes found')).toBeInTheDocument();
+    expect(screen.getByText(/Get started by manifestin/)).toBeInTheDocument();
   });
 
   it('renders task list and updates the stats dashboard', async () => {

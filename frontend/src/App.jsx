@@ -52,7 +52,7 @@ export default function App() {
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
-    showToast(`Switched to ${nextTheme} theme`);
+    showToast(`Switched to ${nextTheme} vibes mode`);
   };
 
   const loadTasks = async () => {
@@ -83,9 +83,9 @@ export default function App() {
     try {
       const newTask = await createTask(taskData);
       setTasks((prev) => [...prev, newTask]);
-      showToast('Task added successfully!');
+      showToast('Vibe locked in successfully! 🚀');
     } catch (err) {
-      showToast(err.message || 'Failed to add task', 'error');
+      showToast(err.message || 'Failed to lock in vibe', 'error');
     }
   };
 
@@ -95,9 +95,9 @@ export default function App() {
       const updated = await updateTask(editingTask.id, taskData);
       setTasks((prev) => prev.map((t) => (t.id === editingTask.id ? updated : t)));
       setEditingTask(null);
-      showToast('Task updated successfully!');
+      showToast('Vibe updated! 💫');
     } catch (err) {
-      showToast(err.message || 'Failed to update task', 'error');
+      showToast(err.message || 'Failed to update vibe', 'error');
     }
   };
 
@@ -105,9 +105,9 @@ export default function App() {
     try {
       const updated = await updateTask(id, { completed });
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-      showToast(completed ? 'Task completed! 🎉' : 'Task marked active');
+      showToast(completed ? 'Slayed! Keep it 100 💅' : 'Vibe reactivated, let\'s get it ⚡');
     } catch (err) {
-      showToast('Failed to toggle status', 'error');
+      showToast('Failed to toggle vibe status', 'error');
     }
   };
 
@@ -121,9 +121,9 @@ export default function App() {
       await deleteTask(deletingTaskId);
       setTasks((prev) => prev.filter((t) => t.id !== deletingTaskId));
       setDeletingTaskId(null);
-      showToast('Task deleted successfully');
+      showToast('Yeeted vibe into the void 💥');
     } catch (err) {
-      showToast('Failed to delete task', 'error');
+      showToast('Failed to yeet vibe', 'error');
     }
   };
 
@@ -136,7 +136,7 @@ export default function App() {
   const handleDragStart = (e, index) => {
     if (sortMode !== 'custom') {
       setSortMode('custom');
-      showToast('Switched to Custom drag-and-drop order');
+      showToast('Switched to Custom drag-and-drop mode');
     }
     dragItemIndex.current = index;
     // Add dragging class for opacity styling
@@ -184,9 +184,9 @@ export default function App() {
     try {
       const orderedIds = reorderedList.map((t) => t.id);
       await reorderTasksOnServer(orderedIds);
-      showToast('Custom order saved');
+      showToast('Custom order saved, no cap 🧢');
     } catch (err) {
-      showToast('Failed to save task order', 'error');
+      showToast('Failed to save vibe order', 'error');
       // Revert from backend database
       loadTasks();
     }
@@ -226,8 +226,8 @@ export default function App() {
   return (
     <div className="app-container">
       <header>
-        <h1 className="app-title">Task Workspace</h1>
-        <p className="app-subtitle">Organize your thoughts, prioritize what matters.</p>
+        <h1 className="app-title">Workspace Vibes ✨</h1>
+        <p className="app-subtitle">Stop slacking, start manifestin'.</p>
         <button 
           className="theme-toggle-btn" 
           onClick={toggleTheme} 
@@ -295,11 +295,11 @@ export default function App() {
                   <line x1="9" y1="11" x2="15" y2="11"></line>
                   <line x1="9" y1="18" x2="11" y2="18"></line>
                 </svg>
-                <h3>No tasks found</h3>
+                <h3>No vibes found</h3>
                 <p>
                   {searchQuery || statusFilter !== 'all' 
-                    ? 'Try adjusting your search criteria or filters.' 
-                    : 'Get started by creating your first task above!'}
+                    ? 'Adjust your search queries or tabs, bestie.' 
+                    : 'Get started by manifestin\' a new vibe above! ✨'}
                 </p>
               </div>
             ) : (
@@ -321,8 +321,8 @@ export default function App() {
 
             {/* Visual indicator warning if dragging is disabled due to active filters */}
             {sortMode === 'custom' && !isDraggable && (
-              <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                💡 Drag-and-drop sorting is disabled while active filters or search queries are applied.
+              <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '8px', fontWeight: '700' }}>
+                💡 Drag-and-drop sorting is disabled while filters/searches are active, no cap.
               </div>
             )}
           </div>
@@ -341,8 +341,8 @@ export default function App() {
       {/* Delete Confirmation Dialog */}
       <ConfirmationModal
         isOpen={!!deletingTaskId}
-        title="Delete Task"
-        message="Are you sure you want to delete this task? This action cannot be undone."
+        title="Trash this vibe?"
+        message="Wait, are you sure? This vibe is getting yeeted forever, no cap. 🧢"
         onConfirm={handleDeleteTask}
         onCancel={() => setDeletingTaskId(null)}
       />
