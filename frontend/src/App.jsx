@@ -233,7 +233,7 @@ export default function App() {
   return (
     <div className="app-container">
       <header>
-        <h1 className="app-title">Task Workspace</h1>
+        <h1 className="app-title">TASK WORKSPACE</h1>
         <p className="app-subtitle">Organize your thoughts, prioritize what matters.</p>
         <button 
           className="theme-toggle-btn" 
@@ -262,15 +262,19 @@ export default function App() {
       </header>
 
       <main style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Statistics Dashboard */}
-        <Dashboard tasks={tasks} />
-
-        {/* Calendar Widget */}
-        <CalendarView 
-          tasks={tasks}
-          selectedDate={selectedCalendarDate}
-          onSelectDate={setSelectedCalendarDate}
-        />
+        {/* Split Top Layout: Dashboard Stats on Left, Calendar on Right */}
+        <div className="top-split-layout">
+          <div className="left-panel">
+            <Dashboard tasks={tasks} />
+          </div>
+          <div className="right-panel">
+            <CalendarView 
+              tasks={tasks}
+              selectedDate={selectedCalendarDate}
+              onSelectDate={setSelectedCalendarDate}
+            />
+          </div>
+        </div>
 
         {/* Task Creator Form */}
         <TaskForm onSubmit={handleAddTask} />

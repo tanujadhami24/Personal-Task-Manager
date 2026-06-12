@@ -233,21 +233,64 @@ header {
 }
 
 /* Dashboard Statistics - iOS Pill Card Gradients */
-.dashboard-grid {
+/* Split Layout for Side-by-Side Dashboard & Calendar */
+.top-split-layout {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
   margin-bottom: 30px;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .top-split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.right-panel {
+  height: 100%;
+}
+
+/* Dashboard Statistics - iOS Pill Card Gradients (Stacked Vertically) */
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  margin-bottom: 0;
 }
 
 .stat-card {
-  text-align: center;
-  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
   border-radius: 20px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   box-shadow: var(--shadow-lg);
   transition: all var(--transition-fast);
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+  margin: 0;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .stat-card:nth-child(1) {
@@ -278,8 +321,8 @@ header {
 }
 
 .progress-container {
-  grid-column: span 3;
-  margin-top: 8px;
+  margin-top: auto; /* Push progress bar container to bottom */
+  padding-top: 16px;
 }
 
 .progress-bar-bg {

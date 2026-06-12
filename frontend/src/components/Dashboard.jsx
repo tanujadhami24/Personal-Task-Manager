@@ -9,16 +9,16 @@ export default function Dashboard({ tasks }) {
   return (
     <div className="glass-panel dashboard-grid" data-testid="dashboard">
       <div className="stat-card">
-        <div className="stat-value">{total}</div>
         <div className="stat-label">Total</div>
+        <div className="stat-value">{total}</div>
       </div>
       <div className="stat-card">
-        <div className="stat-value" style={{ color: 'var(--text-secondary)' }}>{active}</div>
         <div className="stat-label">Active</div>
+        <div className="stat-value" style={{ color: 'var(--text-secondary)' }}>{active}</div>
       </div>
       <div className="stat-card">
-        <div className="stat-value" style={{ color: 'var(--accent-success)' }}>{completed}</div>
         <div className="stat-label">Completed</div>
+        <div className="stat-value" style={{ color: 'var(--accent-success)' }}>{completed}</div>
       </div>
       
       <div className="progress-container">
