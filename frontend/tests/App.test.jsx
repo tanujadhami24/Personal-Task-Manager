@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import React from 'react';
 import App from '../src/App';
@@ -43,8 +43,8 @@ describe('App React Component', () => {
     api.fetchTasks.mockResolvedValue([]);
     render(<App />);
 
-    expect(screen.getByText('Workspace Vibes ✨')).toBeInTheDocument();
-    expect(screen.getByText(/Stop slacking, start manifestin/)).toBeInTheDocument();
+    expect(screen.getByText('Task Workspace')).toBeInTheDocument();
+    expect(screen.getByText(/Organize your thoughts/)).toBeInTheDocument();
   });
 
   it('displays the loading state initially', async () => {
@@ -63,8 +63,8 @@ describe('App React Component', () => {
       expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText('No vibes found')).toBeInTheDocument();
-    expect(screen.getByText(/Get started by manifestin/)).toBeInTheDocument();
+    expect(screen.getByText('No tasks found')).toBeInTheDocument();
+    expect(screen.getByText(/Get started by creating your first task/)).toBeInTheDocument();
   });
 
   it('renders task list and updates the stats dashboard', async () => {
@@ -87,5 +87,21 @@ describe('App React Component', () => {
     // Both Active and Completed counts are '1', so there should be two elements with text '1'
     const onesList = screen.getAllByText('1');
     expect(onesList.length).toBe(2);
+  });
+
+  it('toggles to calendar view when the calendar tab is clicked', async () => {
+    api.fetchTasks.mockResolvedValue(mockTasks);
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
+    });
+
+    // Toggle to calendar view
+    const calendarTab = screen.getByText('Calendar View');
+    fireEvent.click(calendarTab);
+
+    // Verify calendar container is rendered
+    expect(screen.getByTestId('calendar-view')).toBeInTheDocument();
   });
 });

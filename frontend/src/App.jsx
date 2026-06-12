@@ -11,6 +11,7 @@ import {
   deleteTask, 
   reorderTasksOnServer 
 } from './utils/api';
+import CalendarView from './components/CalendarView';
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
@@ -25,6 +26,10 @@ export default function App() {
   // Editing & Deleting states
   const [editingTask, setEditingTask] = useState(null);
   const [deletingTaskId, setDeletingTaskId] = useState(null);
+
+  // View States
+  const [viewMode, setViewMode] = useState('list');
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
   
   // Feedback Toasts
   const [toasts, setToasts] = useState([]);
@@ -128,10 +133,10 @@ export default function App() {
   };
 
   // Drag-and-Drop handlers
-  // Reordering is only allowed when filters and search query are cleared
+  // Reordering is only allowed in List View when filters and search query are cleared
   const isDraggable = useMemo(() => {
-    return statusFilter === 'all' && !searchQuery.trim();
-  }, [statusFilter, searchQuery]);
+    return viewMode === 'list' && statusFilter === 'all' && !searchQuery.trim();
+  }, [viewMode, statusFilter, searchQuery]);
 
   const handleDragStart = (e, index) => {
     if (sortMode !== 'custom') {
@@ -211,6 +216,11 @@ export default function App() {
       result = result.filter((t) => t.completed);
     }
 
+    // Filter by calendar selected date
+    if (viewMode === 'calendar' && selectedCalendarDate) {
+      result = result.filter((t) => t.dueDate === selectedCalendarDate);
+    }
+
     // Sorting Modes
     if (sortMode === 'date-desc') {
       result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -221,7 +231,7 @@ export default function App() {
     }
 
     return result;
-  }, [tasks, searchQuery, statusFilter, sortMode]);
+  }, [tasks, searchQuery, statusFilter, sortMode, viewMode, selectedCalendarDate]);
 
   return (
     <div className="app-container">
@@ -257,6 +267,53 @@ export default function App() {
       <main style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {/* Statistics Dashboard */}
         <Dashboard tasks={tasks} />
+
+        {/* View Switcher: List vs Calendar */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="filter-tabs" style={{ padding: '4px' }}>
+            <button 
+              className={`filter-tab ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => {
+                setViewMode('list');
+                setSelectedCalendarDate(null);
+              }}
+            >
+              List View
+            </button>
+            <button 
+              className={`filter-tab ${viewMode === 'calendar' ? 'active' : ''}`}
+              onClick={() => setViewMode('calendar')}
+            >
+              Calendar View
+            </button>
+          </div>
+        </div>
+
+        {/* Calendar Grid Section */}
+        {viewMode === 'calendar' && (
+          <CalendarView 
+            tasks={tasks}
+            selectedDate={selectedCalendarDate}
+            onSelectDate={setSelectedCalendarDate}
+          />
+        )}
+
+        {/* Calendar Specific Active Filter Information */}
+        {viewMode === 'calendar' && selectedCalendarDate && (
+          <div className="glass-panel" style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderRadius: '16px' }}>
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              Showing tasks due on: <strong>{
+                (() => {
+                  const [year, month, day] = selectedCalendarDate.split('-').map(Number);
+                  return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                })()
+              }</strong>
+            </span>
+            <button className="btn btn-text" onClick={() => setSelectedCalendarDate(null)} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
+              Clear Date Filter
+            </button>
+          </div>
+        )}
 
         {/* Task Creator Form */}
         <TaskForm onSubmit={handleAddTask} />
