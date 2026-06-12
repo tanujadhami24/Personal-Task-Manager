@@ -83,13 +83,18 @@ describe('App React Component', () => {
     // Verify stats in dashboard: Total = 2, Active = 1, Completed = 1
     const dashboard = screen.getByTestId('dashboard');
     expect(dashboard).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument(); // Total value
-    // Both Active and Completed counts are '1', so there should be two elements with text '1'
-    const onesList = screen.getAllByText('1');
-    expect(onesList.length).toBe(2);
+    
+    const totalCardVal = dashboard.querySelector('.stat-card:nth-child(1) .stat-value');
+    expect(totalCardVal).toHaveTextContent('2');
+
+    const activeCardVal = dashboard.querySelector('.stat-card:nth-child(2) .stat-value');
+    expect(activeCardVal).toHaveTextContent('1');
+
+    const completedCardVal = dashboard.querySelector('.stat-card:nth-child(3) .stat-value');
+    expect(completedCardVal).toHaveTextContent('1');
   });
 
-  it('toggles to calendar view when the calendar tab is clicked', async () => {
+  it('renders calendar component and displays task color indicators', async () => {
     api.fetchTasks.mockResolvedValue(mockTasks);
     render(<App />);
 
@@ -97,11 +102,44 @@ describe('App React Component', () => {
       expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
     });
 
-    // Toggle to calendar view
-    const calendarTab = screen.getByText('Calendar View');
-    fireEvent.click(calendarTab);
+    // Verify calendar is rendered
+    const calendarView = screen.getByTestId('calendar-view');
+    expect(calendarView).toBeInTheDocument();
 
-    // Verify calendar container is rendered
-    expect(screen.getByTestId('calendar-view')).toBeInTheDocument();
+    // Verify task day highlights in June 2026 (current month cells only)
+    const activeDayCell = calendarView.querySelector('.current-month .day-active');
+    expect(activeDayCell).toHaveTextContent('30');
+
+    const completedDayCell = calendarView.querySelector('.current-month .day-completed');
+    expect(completedDayCell).toHaveTextContent('10');
+  });
+
+  it('filters task list to selected calendar date on click', async () => {
+    api.fetchTasks.mockResolvedValue(mockTasks);
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
+    });
+
+    // Click on day cell 30 (which has due date 2026-06-30)
+    const calendarView = screen.getByTestId('calendar-view');
+    const activeDayCell = calendarView.querySelector('.current-month .day-active');
+    fireEvent.click(activeDayCell);
+
+    // Verify task list is filtered (shows Buy Groceries, hides Submit Assignment)
+    expect(screen.getByText('Buy Groceries')).toBeInTheDocument();
+    expect(screen.queryByText('Submit Assignment')).not.toBeInTheDocument();
+
+    // Verify active filter header note appears
+    expect(screen.getByText(/Showing tasks due on/)).toBeInTheDocument();
+
+    // Click "Clear Date Filter" button
+    const clearButton = screen.getByText('Clear Date Filter');
+    fireEvent.click(clearButton);
+
+    // Both tasks should show up again
+    expect(screen.getByText('Buy Groceries')).toBeInTheDocument();
+    expect(screen.getByText('Submit Assignment')).toBeInTheDocument();
   });
 });

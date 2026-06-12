@@ -1,232 +1,233 @@
 import React, { useState, useMemo } from 'react';
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-const WEEK_DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
 export default function CalendarView({ tasks, selectedDate, onSelectDate }) {
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
+  const [navDate, setNavDate] = useState(new Date());
+  const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
 
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [showPicker, setShowPicker] = useState(false);
+  const currentMonth = navDate.getMonth();
+  const currentYear = navDate.getFullYear();
 
-  // Helper to pad double digits
-  const pad = (n) => String(n).padStart(2, '0');
+  // Helper lists for selectors
+  const monthsList = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
-  // Month navigation handlers
+  // Quick nav handlers
   const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(prev => prev - 1);
-    } else {
-      setCurrentMonth(prev => prev - 1);
-    }
+    setNavDate(new Date(currentYear, currentMonth - 1, 1));
   };
 
   const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(prev => prev + 1);
-    } else {
-      setCurrentMonth(prev => prev + 1);
-    }
+    setNavDate(new Date(currentYear, currentMonth + 1, 1));
   };
 
-  // Generate calendar grid cells (42 total)
+  const handleSelectMonth = (monthIdx) => {
+    setNavDate(new Date(currentYear, monthIdx, 1));
+    setIsMonthDropdownOpen(false);
+  };
+
+  // Check if a task is overdue
+  const isTaskOverdue = (task) => {
+    if (!task.dueDate || task.completed) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const [year, month, day] = task.dueDate.split('-').map(Number);
+    const due = new Date(year, month - 1, day);
+    due.setHours(0, 0, 0, 0);
+    return due < today;
+  };
+
+  // Generate calendar day cells
   const cells = useMemo(() => {
-    const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
-    const getFirstDayOfMonth = (y, m) => new Date(y, m, 1).getDay();
+    // Determine total days in month
+    const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+    // Determine day of the week for the 1st of the month (0 = Sun, ..., 6 = Sat)
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+    
+    // Determine total days in previous month for padding
+    const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
 
-    const daysInCurrentMonth = getDaysInMonth(currentYear, currentMonth);
-    const firstDayIndex = getFirstDayOfMonth(currentYear, currentMonth);
+    const dayCells = [];
 
-    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-    const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
-
-    const list = [];
-
-    // Previous month padding days
+    // 1. Previous month padding cells
     for (let i = firstDayIndex - 1; i >= 0; i--) {
-      const d = daysInPrevMonth - i;
-      list.push({
-        day: d,
-        month: prevMonth,
-        year: prevYear,
+      const dayNum = prevMonthDays - i;
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      
+      // Format date string YYYY-MM-DD
+      const mm = String(prevMonth + 1).padStart(2, '0');
+      const dd = String(dayNum).padStart(2, '0');
+      const dateStr = `${prevYear}-${mm}-${dd}`;
+
+      dayCells.push({
+        dayNum,
+        dateStr,
         isCurrentMonth: false
       });
     }
 
-    // Current month days
-    for (let d = 1; d <= daysInCurrentMonth; d++) {
-      list.push({
-        day: d,
-        month: currentMonth,
-        year: currentYear,
+    // 2. Current month cells
+    for (let i = 1; i <= totalDays; i++) {
+      const mm = String(currentMonth + 1).padStart(2, '0');
+      const dd = String(i).padStart(2, '0');
+      const dateStr = `${currentYear}-${mm}-${dd}`;
+
+      dayCells.push({
+        dayNum: i,
+        dateStr,
         isCurrentMonth: true
       });
     }
 
-    // Next month padding days to round up to 42 cells (6 weeks)
-    const remaining = 42 - list.length;
-    const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
-    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-    for (let n = 1; n <= remaining; n++) {
-      list.push({
-        day: n,
-        month: nextMonth,
-        year: nextYear,
+    // 3. Next month padding cells
+    const totalCellsSoFar = dayCells.length;
+    const remainingCells = 42 - totalCellsSoFar; // Align to 6 rows of 7 days
+    for (let i = 1; i <= remainingCells; i++) {
+      const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+      const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+
+      const mm = String(nextMonth + 1).padStart(2, '0');
+      const dd = String(i).padStart(2, '0');
+      const dateStr = `${nextYear}-${mm}-${dd}`;
+
+      dayCells.push({
+        dayNum: i,
+        dateStr,
         isCurrentMonth: false
       });
     }
 
-    return list;
-  }, [currentYear, currentMonth]);
-
-  // Map tasks to dates for faster highlights lookup
-  const tasksByDate = useMemo(() => {
-    const map = {};
-    tasks.forEach(task => {
-      if (task.dueDate) {
-        if (!map[task.dueDate]) {
-          map[task.dueDate] = [];
+    // 4. Map task statuses to each cell
+    return dayCells.map(cell => {
+      // Find all tasks due on this date
+      const tasksOnDay = tasks.filter(t => t.dueDate === cell.dateStr);
+      
+      let status = 'none';
+      if (tasksOnDay.length > 0) {
+        const hasOverdue = tasksOnDay.some(t => isTaskOverdue(t));
+        const allCompleted = tasksOnDay.every(t => t.completed);
+        
+        if (hasOverdue) {
+          status = 'overdue'; // Coral highlight
+        } else if (allCompleted) {
+          status = 'completed'; // Purple highlight
+        } else {
+          status = 'active'; // Blue highlight
         }
-        map[task.dueDate].push(task);
       }
+
+      return {
+        ...cell,
+        status,
+        hasTasks: tasksOnDay.length > 0
+      };
     });
-    return map;
-  }, [tasks]);
+  }, [tasks, currentMonth, currentYear]);
 
-  // Determine styling class for a calendar cell
-  const getCellStatus = (dateStr) => {
-    const dayTasks = tasksByDate[dateStr];
-    if (!dayTasks || dayTasks.length === 0) return null;
+  // Format the display text in the pill header: e.g. "December 2025"
+  const formattedHeaderDate = `${monthsList[currentMonth]} ${currentYear}`;
 
-    // Check if any incomplete task is overdue
-    const hasOverdue = dayTasks.some(task => {
-      return !task.completed && task.dueDate < todayStr;
-    });
-
-    if (hasOverdue) return 'overdue';
-
-    // Check if any incomplete task is active
-    const hasActive = dayTasks.some(task => !task.completed);
-    if (hasActive) return 'active';
-
-    // If there are tasks and all of them are completed, it's completed
-    return 'completed';
-  };
-
-  // Month select options
-  const handleMonthChange = (e) => {
-    setCurrentMonth(parseInt(e.target.value));
-    setShowPicker(false);
-  };
-
-  const handleYearChange = (e) => {
-    setCurrentYear(parseInt(e.target.value));
-    setShowPicker(false);
+  const handleDayClick = (dateStr) => {
+    if (selectedDate === dateStr) {
+      onSelectDate(null); // Clear filter if clicking the active selected day
+    } else {
+      onSelectDate(dateStr); // Select day to filter list
+    }
   };
 
   return (
     <div className="glass-panel calendar-container" data-testid="calendar-view">
-      {/* Calendar Header with Navigation Pill */}
+      {/* Calendar Header with Pill Selector and Navigation */}
       <div className="calendar-header">
-        <div className="calendar-nav-pill" onClick={() => setShowPicker(!showPicker)}>
-          <svg className="nav-pill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-          <span className="nav-pill-text">{MONTH_NAMES[currentMonth]} {currentYear}</span>
-          <svg className={`nav-pill-chevron ${showPicker ? 'open' : ''}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+        {/* Pill Dropdown */}
+        <div style={{ position: 'relative' }}>
+          <button 
+            className="calendar-pill-btn" 
+            onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
+            title="Choose Month"
+          >
+            {/* Calendar Icon */}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>{formattedHeaderDate}</span>
+            {/* Chevron icon */}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '6px' }}>
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          
+          {/* Dropdown popup */}
+          {isMonthDropdownOpen && (
+            <div className="calendar-dropdown glass-panel">
+              {monthsList.map((monthName, idx) => (
+                <button 
+                  key={monthName}
+                  className={`calendar-dropdown-item ${idx === currentMonth ? 'active' : ''}`}
+                  onClick={() => handleSelectMonth(idx)}
+                >
+                  {monthName}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Triple Dot / Navigation Controls */}
-        <div className="calendar-controls">
-          <button className="action-btn" onClick={handlePrevMonth} title="Previous Month" aria-label="Previous month">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        {/* Navigation Arrows */}
+        <div className="calendar-nav-arrows">
+          <button className="action-btn" onClick={handlePrevMonth} title="Previous Month">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
           </button>
-          <button className="action-btn" onClick={handleNextMonth} title="Next Month" aria-label="Next month">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <button className="action-btn" onClick={handleNextMonth} title="Next Month">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Quick Month/Year Dropdown Selectors */}
-      {showPicker && (
-        <div className="calendar-picker-dropdown glass-panel">
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <select value={currentMonth} onChange={handleMonthChange}>
-              {MONTH_NAMES.map((name, idx) => (
-                <option key={idx} value={idx}>{name}</option>
-              ))}
-            </select>
-            <select value={currentYear} onChange={handleYearChange}>
-              {Array.from({ length: 11 }, (_, i) => today.getFullYear() - 5 + i).map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
-
-      {/* Weekday headers (S M T W T F S) */}
-      <div className="calendar-grid-header">
-        {WEEK_DAYS.map((day, idx) => (
-          <div key={idx} className="calendar-grid-header-cell">{day}</div>
-        ))}
+      {/* Weekdays Row: S M T W T F S */}
+      <div className="calendar-weekdays-row">
+        <span>S</span>
+        <span>M</span>
+        <span>T</span>
+        <span>W</span>
+        <span>T</span>
+        <span>F</span>
+        <span>S</span>
       </div>
 
       {/* Days Grid */}
-      <div className="calendar-grid">
+      <div className="calendar-days-grid">
         {cells.map((cell, idx) => {
-          const cellDateStr = `${cell.year}-${pad(cell.month + 1)}-${pad(cell.day)}`;
-          const status = getCellStatus(cellDateStr);
-          const isSelected = selectedDate === cellDateStr;
-          const isToday = cellDateStr === todayStr;
+          const isSelected = selectedDate === cell.dateStr;
+          
+          // Determine day status highlights
+          let highlightClass = '';
+          if (cell.status === 'overdue') highlightClass = 'day-overdue';
+          else if (cell.status === 'completed') highlightClass = 'day-completed';
+          else if (cell.status === 'active') highlightClass = 'day-active';
 
           return (
-            <div 
-              key={idx} 
-              className={`calendar-grid-cell ${cell.isCurrentMonth ? '' : 'outside-month'} ${isSelected ? 'selected' : ''}`}
-              onClick={() => onSelectDate(isSelected ? null : cellDateStr)}
-              data-testid={`calendar-cell-${cellDateStr}`}
+            <button
+              key={`${cell.dateStr}-${idx}`}
+              className={`calendar-day-cell ${cell.isCurrentMonth ? 'current-month' : 'other-month'} ${isSelected ? 'selected' : ''}`}
+              onClick={() => handleDayClick(cell.dateStr)}
+              title={cell.hasTasks ? `Click to see tasks due on ${cell.dateStr}` : `No tasks due`}
             >
-              <div className={`calendar-day-circle ${status || ''} ${isToday ? 'today' : ''}`}>
-                {cell.day}
-              </div>
-            </div>
+              <span className={`day-circle ${highlightClass}`}>
+                {cell.dayNum}
+              </span>
+            </button>
           );
         })}
-      </div>
-
-      {/* Color Coding Legend */}
-      <div className="calendar-legend">
-        <div className="legend-item">
-          <span className="legend-dot color-active"></span>
-          <span>Active</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-dot color-overdue"></span>
-          <span>Overdue</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-dot color-completed"></span>
-          <span>Completed</span>
-        </div>
       </div>
     </div>
   );

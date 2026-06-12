@@ -4,6 +4,7 @@ import FilterPanel from './components/FilterPanel';
 import TaskForm from './components/TaskForm';
 import TaskItem from './components/TaskItem';
 import ConfirmationModal from './components/ConfirmationModal';
+import CalendarView from './components/CalendarView';
 import { 
   fetchTasks, 
   createTask, 
@@ -11,7 +12,6 @@ import {
   deleteTask, 
   reorderTasksOnServer 
 } from './utils/api';
-import CalendarView from './components/CalendarView';
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
@@ -22,14 +22,11 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortMode, setSortMode] = useState('date-desc');
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
   
   // Editing & Deleting states
   const [editingTask, setEditingTask] = useState(null);
   const [deletingTaskId, setDeletingTaskId] = useState(null);
-
-  // View States
-  const [viewMode, setViewMode] = useState('list');
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
   
   // Feedback Toasts
   const [toasts, setToasts] = useState([]);
@@ -133,10 +130,10 @@ export default function App() {
   };
 
   // Drag-and-Drop handlers
-  // Reordering is only allowed in List View when filters and search query are cleared
+  // Reordering is only allowed when filters and search query are cleared
   const isDraggable = useMemo(() => {
-    return viewMode === 'list' && statusFilter === 'all' && !searchQuery.trim();
-  }, [viewMode, statusFilter, searchQuery]);
+    return statusFilter === 'all' && !searchQuery.trim();
+  }, [statusFilter, searchQuery]);
 
   const handleDragStart = (e, index) => {
     if (sortMode !== 'custom') {
@@ -216,8 +213,8 @@ export default function App() {
       result = result.filter((t) => t.completed);
     }
 
-    // Filter by calendar selected date
-    if (viewMode === 'calendar' && selectedCalendarDate) {
+    // Calendar selected date filter
+    if (selectedCalendarDate) {
       result = result.filter((t) => t.dueDate === selectedCalendarDate);
     }
 
@@ -231,7 +228,7 @@ export default function App() {
     }
 
     return result;
-  }, [tasks, searchQuery, statusFilter, sortMode, viewMode, selectedCalendarDate]);
+  }, [tasks, searchQuery, statusFilter, sortMode, selectedCalendarDate]);
 
   return (
     <div className="app-container">
@@ -268,52 +265,12 @@ export default function App() {
         {/* Statistics Dashboard */}
         <Dashboard tasks={tasks} />
 
-        {/* View Switcher: List vs Calendar */}
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div className="filter-tabs" style={{ padding: '4px' }}>
-            <button 
-              className={`filter-tab ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => {
-                setViewMode('list');
-                setSelectedCalendarDate(null);
-              }}
-            >
-              List View
-            </button>
-            <button 
-              className={`filter-tab ${viewMode === 'calendar' ? 'active' : ''}`}
-              onClick={() => setViewMode('calendar')}
-            >
-              Calendar View
-            </button>
-          </div>
-        </div>
-
-        {/* Calendar Grid Section */}
-        {viewMode === 'calendar' && (
-          <CalendarView 
-            tasks={tasks}
-            selectedDate={selectedCalendarDate}
-            onSelectDate={setSelectedCalendarDate}
-          />
-        )}
-
-        {/* Calendar Specific Active Filter Information */}
-        {viewMode === 'calendar' && selectedCalendarDate && (
-          <div className="glass-panel" style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderRadius: '16px' }}>
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              Showing tasks due on: <strong>{
-                (() => {
-                  const [year, month, day] = selectedCalendarDate.split('-').map(Number);
-                  return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                })()
-              }</strong>
-            </span>
-            <button className="btn btn-text" onClick={() => setSelectedCalendarDate(null)} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
-              Clear Date Filter
-            </button>
-          </div>
-        )}
+        {/* Calendar Widget */}
+        <CalendarView 
+          tasks={tasks}
+          selectedDate={selectedCalendarDate}
+          onSelectDate={setSelectedCalendarDate}
+        />
 
         {/* Task Creator Form */}
         <TaskForm onSubmit={handleAddTask} />
@@ -342,8 +299,22 @@ export default function App() {
           </div>
         ) : (
           /* Task List Rendering */
-          <div className="task-list">
-            {processedTasks.length === 0 ? (
+          <>
+            {selectedCalendarDate && (
+              <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderRadius: '16px', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                <span>📅 Showing tasks due on <strong>{
+                  (() => {
+                    const [year, month, day] = selectedCalendarDate.split('-').map(Number);
+                    return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                  })()
+                }</strong></span>
+                <button className="btn-text" onClick={() => setSelectedCalendarDate(null)} style={{ padding: '4px 8px', fontSize: '0.85rem', color: 'var(--accent-danger)' }}>
+                  Clear Date Filter
+                </button>
+              </div>
+            )}
+            <div className="task-list">
+              {processedTasks.length === 0 ? (
               <div className="glass-panel empty-state">
                 <svg className="empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -383,6 +354,7 @@ export default function App() {
               </div>
             )}
           </div>
+          </>
         )}
       </main>
 
