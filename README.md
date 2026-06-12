@@ -1,12 +1,12 @@
 # Personal Task Workspace
 
-A premium full-stack task management application built with **React (Vite)** on the frontend and **Node.js (Express)** on the backend. It features persistent storage, custom dark-mode glassmorphism styling, native HTML5 drag-and-drop custom ordering, due-date overdue tracking, and a comprehensive test suite.
+A premium full-stack task management application built with **React (Vite)** on the frontend and **Node.js (Express)** on the backend. It features persistent storage, custom sky-blue glassmorphism styling, an interactive monthly calendar view, native HTML5 drag-and-drop custom ordering, due-date overdue tracking, and a comprehensive test suite.
 
 ---
 
 ## Technical Stack
 
-- **Frontend**: React 19 (scaffolded with Vite), Vanilla CSS (Glassmorphism layout), Vitest + React Testing Library.
+- **Frontend**: React 19 (scaffolded with Vite), Vanilla CSS (Sky-Blue Glassmorphism layout), Vitest + React Testing Library.
 - **Backend**: Node.js + Express, Jest + Supertest for integration testing.
 - **Storage**: Local JSON database (`backend/tasks-db.json`) for data persistence across restarts without requiring SQLite binary compile tools on Windows.
 
@@ -22,13 +22,21 @@ A premium full-stack task management application built with **React (Vite)** on 
 - **Filter**: Filter task list by status tabs (**All**, **Active**, **Completed**).
 
 ### 📈 Should-Have (UI & Diagnostics)
-- **Statistics Dashboard**: Live stats cards showing total tasks, active tasks, completed tasks, and a smooth gradient completion progress bar.
+- **Statistics Dashboard**: Live stats cards showing total tasks, active tasks, completed tasks, and a smooth gradient completion progress bar. Styled with custom gradients matching the user's mockup.
 - **Overdue Recognition**: Incomplete tasks with a due date in the past are highlighted with a soft red border and a glowing red "Overdue: Date" warning badge.
 - **Empty States**: A clean vector icon and prompt encouraging the user to add a task when the list is empty or filters have zero matches.
 
+### 📅 Interactive Calendar View (Mockup Feature)
+- **Month Picker dropdown**: Navigational pill-button showing month/year with calendar controls.
+- **Status Circles**: Days containing tasks are highlighted dynamically:
+  - **Cobalt Blue**: Days containing active tasks.
+  - **Coral Orange**: Days containing overdue tasks.
+  - **Purple**: Days where all due tasks have been completed.
+- **Date Filtering**: Click any highlighted day to filter tasks directly below the calendar to show only items due on that specific date.
+
 ### 🚀 Nice-to-Have & Bonuses
 - **Title Search**: Real-time filtering as you type in the search bar.
-- **Drag-and-Drop Reordering**: Drag cards from their left-side handles to custom order them. Rearranging automatically switches the sorting select to **Custom (Drag & Drop)** and saves the index sequence on the backend database.
+- **Drag-and-Drop Reordering**: Drag cards from their left-side handles (in List View) to custom order them. Rearranging automatically switches the sorting select to **Custom (Drag & Drop)** and saves the index sequence on the backend database.
 - **Data Persistence**: Tasks survive server restarts, stored locally in JSON format.
 - **Feedback Toasts**: Slide-in success and error toast banners at the bottom right.
 
