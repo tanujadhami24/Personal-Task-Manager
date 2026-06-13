@@ -1,9 +1,74 @@
 import { useState, useEffect, useRef } from 'react';
 
+// Helper to convert YYYY-MM-DD from database to DD-MM-YY for display
+const convertDbToInputDate = (dbDate) => {
+  if (!dbDate) return '';
+  const parts = dbDate.split('-');
+  if (parts.length !== 3) return dbDate;
+  const [y, m, d] = parts;
+  const shortYear = y.slice(-2); // e.g. '26' from '2026'
+  return `${d}-${m}-${shortYear}`;
+};
+
+// Helper to convert DD-MM-YY or DD-MM-YYYY to YYYY-MM-DD for database
+const convertInputToDbDate = (inputVal) => {
+  if (!inputVal) return null;
+  const clean = inputVal.trim();
+  
+  // DD-MM-YYYY (e.g., 01-05-2026)
+  let match = clean.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (match) {
+    const [, d, m, y] = match;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  
+  // DD-MM-YY (e.g., 01-05-26)
+  match = clean.match(/^(\d{1,2})-(\d{1,2})-(\d{2})$/);
+  if (match) {
+    const [, d, m, y] = match;
+    const fullYear = `20${y}`;
+    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+
+  // DDMMYYYY (e.g. 01052026)
+  match = clean.match(/^(\d{2})(\d{2})(\d{4})$/);
+  if (match) {
+    const [, d, m, y] = match;
+    return `${y}-${m}-${d}`;
+  }
+
+  // DDMMYY (e.g. 010526)
+  match = clean.match(/^(\d{2})(\d{2})(\d{2})$/);
+  if (match) {
+    const [, d, m, y] = match;
+    const fullYear = `20${y}`;
+    return `${fullYear}-${m}-${d}`;
+  }
+
+  // Fallback: JS Date parser
+  try {
+    const date = new Date(clean);
+    if (!isNaN(date.getTime())) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+  } catch {
+    // Fallback parser failure, return null
+  }
+
+  return null;
+};
+
 export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }) {
   const [title, setTitle] = useState(editingTask ? (editingTask.title || '') : '');
   const [description, setDescription] = useState(editingTask ? (editingTask.description || '') : '');
-  const [dueDate, setDueDate] = useState(editingTask ? (editingTask.dueDate || '') : (presetDate || ''));
+  const [dueDateInput, setDueDateInput] = useState(
+    editingTask 
+      ? convertDbToInputDate(editingTask.dueDate) 
+      : convertDbToInputDate(presetDate)
+  );
   const [error, setError] = useState('');
   const titleInputRef = useRef(null);
   const dateInputRef = useRef(null);
@@ -15,6 +80,33 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
     }
   }, [presetDate]);
 
+  const handleTextChange = (e) => {
+    let val = e.target.value;
+    
+    // Auto-insert dashes: format digits as DD-MM-YY
+    const digits = val.replace(/\D/g, '');
+    let formatted;
+    
+    if (digits.length <= 2) {
+      formatted = digits;
+    } else if (digits.length <= 4) {
+      formatted = `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    } else {
+      // Allow up to 8 digits in case they write full year (DD-MM-YYYY)
+      const yearPart = digits.slice(4, 8);
+      formatted = `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${yearPart}`;
+    }
+    
+    setDueDateInput(formatted);
+  };
+
+  const handleBlur = () => {
+    const dbDate = convertInputToDbDate(dueDateInput);
+    if (dbDate) {
+      setDueDateInput(convertDbToInputDate(dbDate));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -23,17 +115,23 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
       return;
     }
 
+    const dbDate = convertInputToDbDate(dueDateInput);
+    if (dueDateInput && !dbDate) {
+      setError('Invalid date format. Please use DD-MM-YY (e.g. 13-06-26)');
+      return;
+    }
+
     onSubmit({
       title: title.trim(),
       description: description.trim(),
-      dueDate: dueDate || null
+      dueDate: dbDate
     });
 
     // Reset if it was a create operation
     if (!editingTask) {
       setTitle('');
       setDescription('');
-      setDueDate('');
+      setDueDateInput('');
       setError('');
     }
   };
@@ -52,10 +150,10 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
             setTitle(e.target.value);
             if (e.target.value.trim()) setError('');
           }}
-          style={error ? { borderColor: 'var(--accent-danger)' } : {}}
+          style={error && !title.trim() ? { borderColor: 'var(--accent-danger)' } : {}}
           maxLength={100}
         />
-        {error && <span style={{ color: 'var(--accent-danger)', fontSize: '0.8rem', marginTop: '2px' }}>{error}</span>}
+        {error && !title.trim() && <span style={{ color: 'var(--accent-danger)', fontSize: '0.8rem', marginTop: '2px' }}>{error}</span>}
       </div>
 
       <div className="form-group">
@@ -75,9 +173,10 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
           <input
             id="task-due-text"
             type="text"
-            placeholder="YYYY-MM-DD"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
+            placeholder="DD-MM-YY"
+            value={dueDateInput}
+            onChange={handleTextChange}
+            onBlur={handleBlur}
             style={{ flex: 1 }}
           />
           <button
@@ -101,8 +200,11 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
           <input
             ref={dateInputRef}
             type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
+            value={convertInputToDbDate(dueDateInput) || ''}
+            onChange={(e) => {
+              const selectedDbDate = e.target.value; // YYYY-MM-DD
+              setDueDateInput(convertDbToInputDate(selectedDbDate));
+            }}
             style={{
               position: 'absolute',
               right: 0,
@@ -115,6 +217,9 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
             aria-label="Calendar date picker selection"
           />
         </div>
+        {error && dueDateInput && !convertInputToDbDate(dueDateInput) && (
+          <span style={{ color: 'var(--accent-danger)', fontSize: '0.8rem', marginTop: '2px' }}>{error}</span>
+        )}
       </div>
     </>
   );
