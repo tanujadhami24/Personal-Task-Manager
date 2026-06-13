@@ -1,6 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import React from 'react';
+
 import App from '../src/App';
 import * as api from '../src/utils/api';
 
@@ -114,7 +114,7 @@ describe('App React Component', () => {
     expect(completedDayCell).toHaveTextContent('10');
   });
 
-  it('filters task list to selected calendar date on click', async () => {
+  it('filters task list to selected calendar date on click through the action modal', async () => {
     api.fetchTasks.mockResolvedValue(mockTasks);
     render(<App />);
 
@@ -126,6 +126,13 @@ describe('App React Component', () => {
     const calendarView = screen.getByTestId('calendar-view');
     const activeDayCell = calendarView.querySelector('.current-month .day-active');
     fireEvent.click(activeDayCell);
+
+    // Verify modal is open
+    expect(screen.getByTestId('calendar-action-modal')).toBeInTheDocument();
+
+    // Click "Filter tasks for this day"
+    const filterOption = screen.getByText('Filter tasks for this day');
+    fireEvent.click(filterOption);
 
     // Verify task list is filtered (shows Buy Groceries, hides Submit Assignment)
     expect(screen.getByText('Buy Groceries')).toBeInTheDocument();
@@ -141,5 +148,83 @@ describe('App React Component', () => {
     // Both tasks should show up again
     expect(screen.getByText('Buy Groceries')).toBeInTheDocument();
     expect(screen.getByText('Submit Assignment')).toBeInTheDocument();
+  });
+
+  it('allows adding a quick reminder from calendar action modal', async () => {
+    api.fetchTasks.mockResolvedValue(mockTasks);
+    api.createTask.mockResolvedValue({
+      id: 'reminder-1',
+      title: 'Call Mum',
+      dueDate: '2026-06-30',
+      type: 'reminder',
+      completed: false,
+      createdAt: '2026-06-13T12:00:00.000Z'
+    });
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
+    });
+
+    const calendarView = screen.getByTestId('calendar-view');
+    const activeDayCell = calendarView.querySelector('.current-month .day-active');
+    fireEvent.click(activeDayCell);
+
+    // Click "Add a quick Reminder"
+    fireEvent.click(screen.getByText('Add a quick Reminder'));
+
+    // Fill in reminder title
+    const input = screen.getByLabelText('Reminder Title');
+    fireEvent.change(input, { target: { value: 'Call Mum' } });
+
+    // Submit reminder
+    fireEvent.click(screen.getByText('Save Reminder'));
+
+    // Assert API called correctly
+    expect(api.createTask).toHaveBeenCalledWith({
+      title: 'Call Mum',
+      dueDate: '2026-06-30',
+      type: 'reminder'
+    });
+  });
+
+  it('allows setting a time-based alarm from calendar action modal', async () => {
+    api.fetchTasks.mockResolvedValue(mockTasks);
+    api.createTask.mockResolvedValue({
+      id: 'alarm-1',
+      title: 'Standup Meeting',
+      dueDate: '2026-06-30',
+      type: 'alarm',
+      alarmTime: '09:00',
+      completed: false,
+      createdAt: '2026-06-13T12:00:00.000Z'
+    });
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
+    });
+
+    const calendarView = screen.getByTestId('calendar-view');
+    const activeDayCell = calendarView.querySelector('.current-month .day-active');
+    fireEvent.click(activeDayCell);
+
+    // Click "Set a time-based Alarm"
+    fireEvent.click(screen.getByText('Set a time-based Alarm'));
+
+    // Fill in title and time
+    fireEvent.change(screen.getByLabelText('Alarm Title'), { target: { value: 'Standup Meeting' } });
+    fireEvent.change(screen.getByLabelText('Alarm Time'), { target: { value: '09:00' } });
+
+    // Submit alarm
+    fireEvent.click(screen.getByText('Save Alarm'));
+
+    // Assert API called correctly
+    expect(api.createTask).toHaveBeenCalledWith({
+      title: 'Standup Meeting',
+      dueDate: '2026-06-30',
+      type: 'alarm',
+      alarmTime: '09:00'
+    });
   });
 });

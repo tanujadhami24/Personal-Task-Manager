@@ -711,6 +711,35 @@ textarea {
   color: var(--text-secondary);
 }
 
+.meta-badge.badge-reminder {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--accent-warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.meta-badge.badge-alarm {
+  background: rgba(139, 92, 246, 0.08);
+  color: #7c3aed;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.theme-dark .meta-badge.badge-alarm {
+  background: rgba(192, 132, 252, 0.1);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.2);
+}
+
+.action-menu-item {
+  transition: all var(--transition-fast) !important;
+}
+
+.action-menu-item:hover {
+  transform: translateY(-2px);
+  background: var(--btn-secondary-hover) !important;
+  border-color: var(--accent-primary) !important;
+  box-shadow: var(--shadow-lg), var(--glow-indigo) !important;
+}
+
 .task-actions {
   display: flex;
   gap: 4px;

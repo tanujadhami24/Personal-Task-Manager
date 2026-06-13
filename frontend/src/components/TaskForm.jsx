@@ -1,26 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-export default function TaskForm({ onSubmit, editingTask, onCancel }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
+export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }) {
+  const [title, setTitle] = useState(editingTask ? (editingTask.title || '') : '');
+  const [description, setDescription] = useState(editingTask ? (editingTask.description || '') : '');
+  const [dueDate, setDueDate] = useState(editingTask ? (editingTask.dueDate || '') : (presetDate || ''));
   const [error, setError] = useState('');
+  const titleInputRef = useRef(null);
 
-  // Populate form if editing
+  // Auto-focus Title input if a preset date is supplied on mount
   useEffect(() => {
-    if (editingTask) {
-      setTitle(editingTask.title || '');
-      setDescription(editingTask.description || '');
-      setDueDate(editingTask.dueDate || '');
-      setError('');
-    } else {
-      // Clear form for creation
-      setTitle('');
-      setDescription('');
-      setDueDate('');
-      setError('');
+    if (presetDate && titleInputRef.current) {
+      titleInputRef.current.focus();
     }
-  }, [editingTask]);
+  }, [presetDate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -51,6 +43,7 @@ export default function TaskForm({ onSubmit, editingTask, onCancel }) {
         <label htmlFor="task-title">Title *</label>
         <input
           id="task-title"
+          ref={titleInputRef}
           type="text"
           placeholder="What needs to be done?"
           value={title}

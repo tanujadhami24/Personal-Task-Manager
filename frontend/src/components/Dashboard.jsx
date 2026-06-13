@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function Dashboard({ tasks }) {
   const total = tasks.length;

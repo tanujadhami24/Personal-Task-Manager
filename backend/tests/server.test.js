@@ -91,6 +91,39 @@ describe('Tasks API Endpoints', () => {
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty('error', 'Task title is required');
     });
+
+    it('should create a reminder successfully', async () => {
+      const res = await request(app)
+        .post('/api/tasks')
+        .send({ title: 'Reminder 1', type: 'reminder' });
+      expect(res.status).toBe(201);
+      expect(res.body.type).toBe('reminder');
+    });
+
+    it('should create an alarm successfully', async () => {
+      const res = await request(app)
+        .post('/api/tasks')
+        .send({ title: 'Alarm 1', type: 'alarm', alarmTime: '08:30' });
+      expect(res.status).toBe(201);
+      expect(res.body.type).toBe('alarm');
+      expect(res.body.alarmTime).toBe('08:30');
+    });
+
+    it('should return 400 for invalid task type', async () => {
+      const res = await request(app)
+        .post('/api/tasks')
+        .send({ title: 'Invalid Type', type: 'invalid' });
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'Invalid task type. Must be task, reminder, or alarm.');
+    });
+
+    it('should return 400 for invalid alarmTime format', async () => {
+      const res = await request(app)
+        .post('/api/tasks')
+        .send({ title: 'Bad Alarm', type: 'alarm', alarmTime: '8:30' });
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'Alarm time must be in HH:MM format.');
+    });
   });
 
   describe('PUT /api/tasks/:id', () => {
@@ -134,6 +167,27 @@ describe('Tasks API Endpoints', () => {
 
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty('error', 'Task not found');
+    });
+
+    it('should update task type and alarmTime successfully', async () => {
+      const initialTask = {
+        id: 'update-type-test',
+        title: 'Initial Title',
+        completed: false,
+        type: 'task',
+        alarmTime: null,
+        createdAt: new Date().toISOString(),
+        orderIndex: 0
+      };
+      await db.saveTasks([initialTask]);
+
+      const res = await request(app)
+        .put('/api/tasks/update-type-test')
+        .send({ type: 'alarm', alarmTime: '18:45' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.type).toBe('alarm');
+      expect(res.body.alarmTime).toBe('18:45');
     });
   });
 

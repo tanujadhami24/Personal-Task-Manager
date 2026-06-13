@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 export default function TaskItem({ 
   task, 
@@ -84,9 +84,20 @@ export default function TaskItem({
         )}
 
         <div className="task-meta">
+          {task.type === 'reminder' && (
+            <span className="meta-badge badge-reminder" data-testid={`task-reminder-badge-${task.id}`}>
+              🔔 Reminder
+            </span>
+          )}
+          {task.type === 'alarm' && (
+            <span className="meta-badge badge-alarm" data-testid={`task-alarm-badge-${task.id}`}>
+              ⏰ Alarm: {task.alarmTime}
+            </span>
+          )}
+          
           {/* Due date display */}
           {task.dueDate && (
-            <span className={`meta-badge ${isOverdue ? 'badge-overdue' : 'badge-date'}`}>
+            <span className={`meta-badge ${isOverdue ? 'badge-overdue' : 'badge-date'}`} data-testid={`task-due-badge-${task.id}`}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>

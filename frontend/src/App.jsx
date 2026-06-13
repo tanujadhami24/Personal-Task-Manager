@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Dashboard from './components/Dashboard';
 import FilterPanel from './components/FilterPanel';
 import TaskForm from './components/TaskForm';
 import TaskItem from './components/TaskItem';
 import ConfirmationModal from './components/ConfirmationModal';
 import CalendarView from './components/CalendarView';
+import CalendarDayActionModal from './components/CalendarDayActionModal';
 import { 
   fetchTasks, 
   createTask, 
@@ -12,6 +13,46 @@ import {
   deleteTask, 
   reorderTasksOnServer 
 } from './utils/api';
+
+// Helper to format local date as YYYY-MM-DD
+const getLocalDateString = (d) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Helper to format local time as HH:MM
+const getLocalTimeString = (d) => {
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
+// Play simple beep audio for alarms
+const playAlarmSound = () => {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    const playBeep = (time) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, time);
+      gain.gain.setValueAtTime(0.4, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(time);
+      osc.stop(time + 0.3);
+    };
+
+    playBeep(audioCtx.currentTime);
+    playBeep(audioCtx.currentTime + 0.4);
+  } catch (e) {
+    console.warn('AudioContext failed to start or play sound', e);
+  }
+};
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
@@ -24,6 +65,10 @@ export default function App() {
   const [sortMode, setSortMode] = useState('date-desc');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
   
+  // Calendar action modal & form prefill states
+  const [clickedCalendarDate, setClickedCalendarDate] = useState(null);
+  const [taskFormPresetDate, setTaskFormPresetDate] = useState('');
+
   // Editing & Deleting states
   const [editingTask, setEditingTask] = useState(null);
   const [deletingTaskId, setDeletingTaskId] = useState(null);
@@ -40,37 +85,6 @@ export default function App() {
   const dragItemIndex = useRef(null);
   const dragOverItemIndex = useRef(null);
 
-  // Sync theme class to document body
-  useEffect(() => {
-    document.body.className = theme === 'dark' ? 'theme-dark' : 'theme-light';
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  // Load all tasks on mount
-  useEffect(() => {
-    loadTasks();
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    showToast(`Switched to ${nextTheme} theme`);
-  };
-
-  const loadTasks = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchTasks();
-      setTasks(data);
-      setError(null);
-    } catch (err) {
-      setError('Could not connect to the task server. Please ensure the backend is running.');
-      showToast('Error connecting to backend server', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Toast notifier
   const showToast = (message, type = 'success') => {
     const id = Date.now();
@@ -80,14 +94,137 @@ export default function App() {
     }, 3000);
   };
 
+  const loadTasks = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchTasks();
+      setTasks(data);
+      setError(null);
+    } catch (err) {
+      console.error('Fetch tasks failed:', err);
+      setError('Could not connect to the task server. Please ensure the backend is running.');
+      showToast('Error connecting to backend server', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleCompleted = async (id, completed) => {
+    try {
+      const updated = await updateTask(id, { completed });
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      showToast(completed ? 'Task completed! 🎉' : 'Task marked active');
+    } catch (err) {
+      console.error('Toggle complete failed:', err);
+      showToast('Failed to toggle status', 'error');
+    }
+  };
+
+  // Sync theme class to document body
+  useEffect(() => {
+    document.body.className = theme === 'dark' ? 'theme-dark' : 'theme-light';
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  // Alarm checking interval
+  useEffect(() => {
+    const checkAlarms = () => {
+      const now = new Date();
+      const localDate = getLocalDateString(now);
+      const localTime = getLocalTimeString(now);
+
+      tasks.forEach(async (task) => {
+        if (
+          task.type === 'alarm' && 
+          !task.completed && 
+          task.dueDate === localDate && 
+          task.alarmTime === localTime
+        ) {
+          // Play sound
+          playAlarmSound();
+          
+          // Toast and browser alert
+          showToast(`⏰ Alarm: ${task.title}`, 'warning');
+          
+          // Auto complete
+          try {
+            await handleToggleCompleted(task.id, true);
+          } catch (err) {
+            console.error('Failed to auto-complete alarm task', err);
+          }
+          
+          // Trigger blocking alert dialog
+          alert(`⏰ ALARM: ${task.title}\nTime: ${task.alarmTime}`);
+        }
+      });
+    };
+
+    const intervalId = setInterval(checkAlarms, 10000); // Check every 10 seconds
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks]);
+
+  // Load all tasks on mount
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    showToast(`Switched to ${nextTheme} theme`);
+  };
+
   // CRUD handlers
   const handleAddTask = async (taskData) => {
     try {
       const newTask = await createTask(taskData);
       setTasks((prev) => [...prev, newTask]);
       showToast('Task added successfully!');
+      setTaskFormPresetDate(''); // Reset prefill after adding a task
     } catch (err) {
       showToast(err.message || 'Failed to add task', 'error');
+    }
+  };
+
+  const handleAddReminder = async (title, dateStr) => {
+    try {
+      const newTask = await createTask({
+        title,
+        dueDate: dateStr,
+        type: 'reminder'
+      });
+      setTasks((prev) => [...prev, newTask]);
+      showToast('Reminder added successfully! 🔔');
+    } catch (err) {
+      showToast(err.message || 'Failed to add reminder', 'error');
+    }
+  };
+
+  const handleSetAlarm = async (title, timeStr, dateStr) => {
+    try {
+      const newTask = await createTask({
+        title,
+        dueDate: dateStr,
+        type: 'alarm',
+        alarmTime: timeStr
+      });
+      setTasks((prev) => [...prev, newTask]);
+      showToast('Alarm scheduled successfully! ⏰');
+    } catch (err) {
+      showToast(err.message || 'Failed to set alarm', 'error');
+    }
+  };
+
+  const handlePrefillTask = (dateStr) => {
+    setTaskFormPresetDate(dateStr);
+    
+    // Smooth scroll to task creation form container
+    const formElement = document.querySelector('[data-testid="create-task-form"]');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -103,16 +240,6 @@ export default function App() {
     }
   };
 
-  const handleToggleCompleted = async (id, completed) => {
-    try {
-      const updated = await updateTask(id, { completed });
-      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-      showToast(completed ? 'Task completed! 🎉' : 'Task marked active');
-    } catch (err) {
-      showToast('Failed to toggle status', 'error');
-    }
-  };
-
   const handleDeleteTaskConfirm = (id) => {
     setDeletingTaskId(id);
   };
@@ -125,6 +252,7 @@ export default function App() {
       setDeletingTaskId(null);
       showToast('Task deleted successfully');
     } catch (err) {
+      console.error('Delete task failed:', err);
       showToast('Failed to delete task', 'error');
     }
   };
@@ -188,6 +316,7 @@ export default function App() {
       await reorderTasksOnServer(orderedIds);
       showToast('Custom order saved');
     } catch (err) {
+      console.error('Reorder tasks failed:', err);
       showToast('Failed to save task order', 'error');
       // Revert from backend database
       loadTasks();
@@ -195,6 +324,7 @@ export default function App() {
   };
 
   // Filter, search, and sort calculation
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const processedTasks = useMemo(() => {
     let result = [...tasks];
 
@@ -271,13 +401,13 @@ export default function App() {
             <CalendarView 
               tasks={tasks}
               selectedDate={selectedCalendarDate}
-              onSelectDate={setSelectedCalendarDate}
+              onSelectDate={setClickedCalendarDate}
             />
           </div>
         </div>
 
         {/* Task Creator Form */}
-        <TaskForm onSubmit={handleAddTask} />
+        <TaskForm key={taskFormPresetDate || 'new'} onSubmit={handleAddTask} presetDate={taskFormPresetDate} />
 
         {/* Search, Status Filtering and Sorting Bar */}
         <FilterPanel 
@@ -365,6 +495,7 @@ export default function App() {
       {/* Focused Edit Modal */}
       {editingTask && (
         <TaskForm
+          key={editingTask.id}
           editingTask={editingTask}
           onSubmit={handleUpdateTaskDetails}
           onCancel={() => setEditingTask(null)}
@@ -399,6 +530,17 @@ export default function App() {
           </div>
         ))}
       </div>
+
+      {/* Calendar Day Action Modal */}
+      <CalendarDayActionModal
+        isOpen={!!clickedCalendarDate}
+        date={clickedCalendarDate}
+        onClose={() => setClickedCalendarDate(null)}
+        onAddReminder={handleAddReminder}
+        onSetAlarm={handleSetAlarm}
+        onSelectFilterDate={setSelectedCalendarDate}
+        onPrefillTask={handlePrefillTask}
+      />
     </div>
   );
 }

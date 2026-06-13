@@ -20,11 +20,25 @@ router.get('/', async (req, res) => {
 // POST /api/tasks - Create a new task
 router.post('/', async (req, res) => {
   try {
-    const { title, description, dueDate } = req.body;
+    const { title, description, dueDate, type, alarmTime } = req.body;
 
     // Server-side validation
     if (!title || typeof title !== 'string' || title.trim() === '') {
       return res.status(400).json({ error: 'Task title is required' });
+    }
+
+    // Validate task type if provided
+    const validTypes = ['task', 'reminder', 'alarm'];
+    const taskType = type || 'task';
+    if (!validTypes.includes(taskType)) {
+      return res.status(400).json({ error: 'Invalid task type. Must be task, reminder, or alarm.' });
+    }
+
+    // Validate alarmTime if alarm type
+    if (taskType === 'alarm' && alarmTime) {
+      if (!/^\d{2}:\d{2}$/.test(alarmTime)) {
+        return res.status(400).json({ error: 'Alarm time must be in HH:MM format.' });
+      }
     }
 
     const tasks = await db.getTasks();
@@ -36,6 +50,8 @@ router.post('/', async (req, res) => {
       description: description ? description.trim() : '',
       completed: false,
       dueDate: dueDate || null,
+      type: taskType,
+      alarmTime: alarmTime || null,
       createdAt: new Date().toISOString(),
       orderIndex: tasks.length // Append at the end of custom order list
     };
@@ -80,7 +96,7 @@ router.put('/reorder', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, completed, dueDate, orderIndex } = req.body;
+    const { title, description, completed, dueDate, orderIndex, type, alarmTime } = req.body;
 
     const tasks = await db.getTasks();
     const taskIndex = tasks.findIndex(t => t.id === id);
@@ -119,6 +135,21 @@ router.put('/:id', async (req, res) => {
         return res.status(400).json({ error: 'orderIndex must be a number' });
       }
       existingTask.orderIndex = orderIndex;
+    }
+
+    if (type !== undefined) {
+      const validTypes = ['task', 'reminder', 'alarm'];
+      if (!validTypes.includes(type)) {
+        return res.status(400).json({ error: 'Invalid task type. Must be task, reminder, or alarm.' });
+      }
+      existingTask.type = type;
+    }
+
+    if (alarmTime !== undefined) {
+      if (alarmTime && !/^\d{2}:\d{2}$/.test(alarmTime)) {
+        return res.status(400).json({ error: 'Alarm time must be in HH:MM format.' });
+      }
+      existingTask.alarmTime = alarmTime || null;
     }
 
     tasks[taskIndex] = existingTask;
