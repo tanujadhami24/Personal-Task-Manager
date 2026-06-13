@@ -234,7 +234,7 @@ header {
   border-color: var(--card-border-hover);
 }
 
-/* Main Layout Grid - Responsive 2-column layout on Desktop, stacked on Mobile */
+/* Responsive Grid-Based Layout for entire Dashboard */
 .app-main-grid {
   display: grid;
   gap: 24px;
@@ -260,11 +260,15 @@ header {
 
 .grid-area-tasks-container {
   grid-area: tasks-container;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
 
+.tasks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* On Desktop screens, transition to a beautiful two-column layout */
 @media (min-width: 992px) {
   .app-main-grid {
     grid-template-columns: 380px 1fr;
@@ -275,12 +279,11 @@ header {
   }
 }
 
-/* Dashboard Statistics - iOS Pill Card Gradients (Stacked Vertically) */
+/* Dashboard Statistics - iOS Pill Card Gradients */
 .dashboard-grid {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  height: 100%;
   margin-bottom: 0;
 }
 

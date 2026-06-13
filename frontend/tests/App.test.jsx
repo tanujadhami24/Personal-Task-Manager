@@ -191,33 +191,31 @@ describe('App React Component', () => {
     });
   });
 
-  it('displays a validation error when an invalid date is typed in TaskForm', async () => {
+  it('displays validation error and blocks submit for invalid due dates', async () => {
     api.fetchTasks.mockResolvedValue([]);
     render(<App />);
 
-    // Wait for the empty state to render
     await waitFor(() => {
       expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
     });
 
-    // Fill in task title
-    fireEvent.change(screen.getByLabelText(/Task \*/i), { target: { value: 'Test Task' } });
+    const titleInput = screen.getByLabelText('Task *');
+    const dateInput = screen.getByLabelText('Due Date');
+    const submitBtn = screen.getByRole('button', { name: /Add Task/i });
 
-    // Fill in an invalid date
-    const dateInput = screen.getByLabelText(/Due Date/i);
+    fireEvent.change(titleInput, { target: { value: 'Test Task' } });
     fireEvent.change(dateInput, { target: { value: '20-26-0510' } });
-    
-    // Trigger blur
+
+    // Blur the date input to trigger inline validation
     fireEvent.blur(dateInput);
 
-    // Verify validation error is displayed inline
-    expect(screen.getByText(/Invalid date. Please enter a valid calendar date/i)).toBeInTheDocument();
+    // Verify inline validation error appears
+    expect(screen.getByText('Invalid date. Please enter a valid calendar date in DD-MM-YY format.')).toBeInTheDocument();
 
-    // Try to submit the form
-    const submitBtn = screen.getByRole('button', { name: /Add Task/i });
+    // Try submitting
     fireEvent.click(submitBtn);
 
-    // Verify API is not called
+    // Verify API was NOT called
     expect(api.createTask).not.toHaveBeenCalled();
   });
 });

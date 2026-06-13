@@ -397,8 +397,8 @@ export default function App() {
           <TaskForm key={taskFormPresetDate || 'new'} onSubmit={handleAddTask} presetDate={taskFormPresetDate} />
         </div>
 
-        {/* Tasks Container Area (holds search/filter panel and tasks list) */}
-        <div className="grid-area-tasks-container">
+        {/* Tasks List Container Area */}
+        <div className="grid-area-tasks-container tasks-container">
           <FilterPanel 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}

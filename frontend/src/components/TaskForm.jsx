@@ -10,16 +10,16 @@ const convertDbToInputDate = (dbDate) => {
   return `${d}-${m}-${shortYear}`;
 };
 
-// Helper to validate if the components form a mathematically valid calendar date within 2000-2099
+// Helper to validate that a calendar date is real and within the sane range 2000-2099
 const isValidCalendarDate = (year, month, day) => {
   const y = parseInt(year, 10);
-  const m = parseInt(month, 10) - 1; // 0-indexed month for JS Date
+  const m = parseInt(month, 10) - 1; // 0-indexed for JS Date
   const d = parseInt(day, 10);
   
   if (isNaN(y) || isNaN(m) || isNaN(d)) return false;
   if (m < 0 || m > 11) return false;
   if (d < 1 || d > 31) return false;
-  if (y < 2000 || y > 2099) return false; // Restrict to a sane range to prevent typing errors like 0510 or 9999
+  if (y < 2000 || y > 2099) return false; // Sane year range for tasks
   
   const dateObj = new Date(y, m, d);
   return dateObj.getFullYear() === y && dateObj.getMonth() === m && dateObj.getDate() === d;
@@ -111,6 +111,9 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
 
   const handleTextChange = (e) => {
     let val = e.target.value;
+    if (!val.trim()) {
+      setError('');
+    }
     
     // Auto-insert dashes: format digits as DD-MM-YY
     const digits = val.replace(/\D/g, '');
