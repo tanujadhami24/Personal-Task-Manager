@@ -234,56 +234,38 @@ header {
   border-color: var(--card-border-hover);
 }
 
-/* Responsive Grid-Based Layout for entire Dashboard */
-.app-main-grid {
+/* Dashboard Statistics - iOS Pill Card Gradients */
+/* Split Layout for Side-by-Side Dashboard & Calendar */
+.top-split-layout {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
-  grid-template-areas:
-    "dashboard"
-    "calendar"
-    "add-task"
-    "tasks-container";
-  align-items: start;
+  margin-bottom: 30px;
+  align-items: stretch;
 }
 
-.grid-area-dashboard {
-  grid-area: dashboard;
-}
-
-.grid-area-calendar {
-  grid-area: calendar;
-}
-
-.grid-area-add-task {
-  grid-area: add-task;
-}
-
-.grid-area-tasks-container {
-  grid-area: tasks-container;
-}
-
-.tasks-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* On Desktop screens, transition to a beautiful two-column layout */
-@media (min-width: 992px) {
-  .app-main-grid {
-    grid-template-columns: 380px 1fr;
-    grid-template-areas:
-      "dashboard calendar"
-      "add-task tasks-container";
-    gap: 32px;
+@media (max-width: 768px) {
+  .top-split-layout {
+    grid-template-columns: 1fr;
   }
 }
 
-/* Dashboard Statistics - iOS Pill Card Gradients */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.right-panel {
+  height: 100%;
+}
+
+/* Dashboard Statistics - iOS Pill Card Gradients (Stacked Vertically) */
 .dashboard-grid {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%;
   margin-bottom: 0;
 }
 
