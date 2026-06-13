@@ -1,6 +1,6 @@
 # Personal Task Workspace
 
-For this project, we chose the **Personal Task Manager / Todo App** exercise. We built a premium full-stack task management application designed to provide a highly interactive, responsive, and robust user experience. It features persistent storage, custom dark-mode glassmorphism styling, native HTML5 drag-and-drop custom ordering, due-date overdue tracking, calendar date actions, time-based beep alarms, and a comprehensive automated testing suite.
+This project is a premium full-stack task management application implementing the **Personal Task Manager / Todo App** exercise. Designed to provide a highly interactive, responsive, and robust user experience, it features persistent storage, custom dark-mode glassmorphism styling, native HTML5 drag-and-drop custom ordering, due-date overdue tracking, calendar date actions, time-based beep alarms, and a comprehensive automated testing suite.
 
 ---
 
@@ -12,7 +12,7 @@ For this project, we chose the **Personal Task Manager / Todo App** exercise. We
 
 ## 🛠️ Tech Stack
 
-We selected the following technologies for their simplicity, responsiveness, and portability:
+The following technologies were selected for their simplicity, responsiveness, and portability:
 
 - **Frontend (React 19 & Vite)**:
   - *React* was chosen to build dynamic, state-driven interactive components (like the calendar dropdowns, real-time list filtering, and drag handles).
@@ -21,9 +21,9 @@ We selected the following technologies for their simplicity, responsiveness, and
 - **Backend (Node.js & Express)**:
   - *Express* provides a clean, lightweight router to handle backend REST APIs for CRUD operations and reordering.
 - **Data Persistence (Local JSON File)**:
-  - We use a local JSON file (`backend/tasks-db.json`) for data persistence. This ensures the app runs out-of-the-box on any machine without requiring SQLite binary build compilers (which frequently fail on Windows developer environments) or external database servers.
+  - A local JSON file (`backend/tasks-db.json`) is used for data persistence. This ensures the app runs out-of-the-box on any machine without requiring SQLite binary build compilers (which frequently fail on Windows developer environments) or external database servers.
 - **Testing (Jest, Supertest, Vitest, React Testing Library)**:
-  - We use *Jest + Supertest* for API integration testing, and *Vitest + RTL* for fast frontend component unit tests.
+  - *Jest + Supertest* are used for API integration testing, and *Vitest + RTL* are used for fast frontend component unit tests.
 
 ---
 
