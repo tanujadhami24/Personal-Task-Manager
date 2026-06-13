@@ -4,13 +4,15 @@ This project is a premium full-stack task management application implementing th
 
 ---
 
-## 🔗 Live Demo Links
+## Live Demo Links
 
 - **Deployment Link**: Not currently hosted online. Please follow the instructions below to run the full stack locally.
 
+There is problem in live hosting it could not connect to the task server, backend is not running
+
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 The following technologies were selected for their simplicity, responsiveness, and portability:
 
@@ -27,7 +29,7 @@ The following technologies were selected for their simplicity, responsiveness, a
 
 ---
 
-## 🚀 How to Run Locally
+## How to Run Locally
 
 Follow these exact steps to run the application locally. Make sure you have [Node.js](https://nodejs.org/) installed on your system.
 
@@ -54,7 +56,7 @@ npm run test
 
 ---
 
-## 📖 API Documentation
+## API Documentation
 
 The backend API server runs on port `5000` and exposes the following endpoints:
 
@@ -166,7 +168,7 @@ The backend API server runs on port `5000` and exposes the following endpoints:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 This monorepo separates backend servers and frontend assets:
 
@@ -207,7 +209,7 @@ personal-task-manager/
 
 ---
 
-## 🔮 Next Steps
+## Next Steps
 
 ### What was left out (Limitations)
 1. **Multi-User Partitioning**: Tasks are global. There is no user signup, login sessions, or private lists.
