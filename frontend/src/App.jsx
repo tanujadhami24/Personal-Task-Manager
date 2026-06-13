@@ -378,12 +378,12 @@ export default function App() {
       </header>
 
       <main className="app-main-grid">
-        {/* Dashboard component */}
+        {/* Dashboard Stats */}
         <div className="grid-area-dashboard">
           <Dashboard tasks={tasks} />
         </div>
 
-        {/* Calendar component */}
+        {/* Calendar View */}
         <div className="grid-area-calendar">
           <CalendarView 
             tasks={tasks}
@@ -397,8 +397,9 @@ export default function App() {
           <TaskForm key={taskFormPresetDate || 'new'} onSubmit={handleAddTask} presetDate={taskFormPresetDate} />
         </div>
 
-        {/* Search, Status Filtering, Sorting, and Tasks List */}
+        {/* Tasks Workspace Feed (Filters & List) */}
         <div className="grid-area-tasks-container tasks-container">
+          {/* Search, Status Filtering and Sorting Bar */}
           <FilterPanel 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
