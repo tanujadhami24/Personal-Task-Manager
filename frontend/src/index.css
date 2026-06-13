@@ -481,7 +481,7 @@ textarea {
 
 .search-input {
   width: 100%;
-  padding-left: 44px;
+  padding-left: 44px !important;
   border-radius: 9999px;
   background: var(--input-bg);
   border: 1px solid var(--card-border);
