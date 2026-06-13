@@ -22,6 +22,7 @@
   --card-bg: rgba(255, 255, 255, 0.65);
   --card-border: rgba(255, 255, 255, 0.5);
   --card-border-hover: rgba(56, 189, 248, 0.4);
+  --checkbox-border: rgba(15, 23, 42, 0.25);
   
   --text-primary: #0f172a; /* Slate 900 */
   --text-secondary: #475569; /* Slate 600 */
@@ -86,6 +87,7 @@
   --card-bg: rgba(15, 23, 42, 0.5);
   --card-border: rgba(255, 255, 255, 0.05);
   --card-border-hover: rgba(56, 189, 248, 0.3);
+  --checkbox-border: rgba(255, 255, 255, 0.35);
   
   --text-primary: #f8f9fa;
   --text-secondary: #94a3b8;
@@ -624,7 +626,7 @@ textarea {
   width: 22px;
   height: 22px;
   border-radius: 50%; /* Rounded Circles for Todo Items */
-  border: 2px solid var(--card-border);
+  border: 2px solid var(--checkbox-border);
   background: transparent;
   cursor: pointer;
   display: inline-flex;
