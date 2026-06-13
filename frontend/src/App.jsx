@@ -349,7 +349,7 @@ export default function App() {
   return (
     <div className="app-container">
       <header>
-        <h1 className="app-title">TASK WORKSPACE</h1>
+        <h1 className="app-title">PERSONAL TASK WORKSPACE</h1>
         <p className="app-subtitle">Organize your thoughts, prioritize what matters.</p>
         <button 
           className="theme-toggle-btn" 

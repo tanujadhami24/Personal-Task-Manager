@@ -43,7 +43,7 @@ describe('App React Component', () => {
     api.fetchTasks.mockResolvedValue([]);
     render(<App />);
 
-    expect(screen.getByText('TASK WORKSPACE')).toBeInTheDocument();
+    expect(screen.getByText('PERSONAL TASK WORKSPACE')).toBeInTheDocument();
     expect(screen.getByText(/Organize your thoughts/)).toBeInTheDocument();
   });
 
