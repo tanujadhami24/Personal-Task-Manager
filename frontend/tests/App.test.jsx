@@ -190,4 +190,34 @@ describe('App React Component', () => {
       alarmTime: '09:00'
     });
   });
+
+  it('displays a validation error when an invalid date is typed in TaskForm', async () => {
+    api.fetchTasks.mockResolvedValue([]);
+    render(<App />);
+
+    // Wait for the empty state to render
+    await waitFor(() => {
+      expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
+    });
+
+    // Fill in task title
+    fireEvent.change(screen.getByLabelText(/Task \*/i), { target: { value: 'Test Task' } });
+
+    // Fill in an invalid date
+    const dateInput = screen.getByLabelText(/Due Date/i);
+    fireEvent.change(dateInput, { target: { value: '20-26-0510' } });
+    
+    // Trigger blur
+    fireEvent.blur(dateInput);
+
+    // Verify validation error is displayed inline
+    expect(screen.getByText(/Invalid date. Please enter a valid calendar date/i)).toBeInTheDocument();
+
+    // Try to submit the form
+    const submitBtn = screen.getByRole('button', { name: /Add Task/i });
+    fireEvent.click(submitBtn);
+
+    // Verify API is not called
+    expect(api.createTask).not.toHaveBeenCalled();
+  });
 });

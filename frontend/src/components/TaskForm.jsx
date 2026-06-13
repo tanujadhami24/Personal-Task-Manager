@@ -10,6 +10,21 @@ const convertDbToInputDate = (dbDate) => {
   return `${d}-${m}-${shortYear}`;
 };
 
+// Helper to validate if the components form a mathematically valid calendar date within 2000-2099
+const isValidCalendarDate = (year, month, day) => {
+  const y = parseInt(year, 10);
+  const m = parseInt(month, 10) - 1; // 0-indexed month for JS Date
+  const d = parseInt(day, 10);
+  
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return false;
+  if (m < 0 || m > 11) return false;
+  if (d < 1 || d > 31) return false;
+  if (y < 2000 || y > 2099) return false; // Restrict to a sane range to prevent typing errors like 0510 or 9999
+  
+  const dateObj = new Date(y, m, d);
+  return dateObj.getFullYear() === y && dateObj.getMonth() === m && dateObj.getDate() === d;
+};
+
 // Helper to convert DD-MM-YY or DD-MM-YYYY to YYYY-MM-DD for database
 const convertInputToDbDate = (inputVal) => {
   if (!inputVal) return null;
@@ -19,7 +34,10 @@ const convertInputToDbDate = (inputVal) => {
   let match = clean.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
   if (match) {
     const [, d, m, y] = match;
-    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    if (isValidCalendarDate(y, m, d)) {
+      return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    }
+    return null;
   }
   
   // DD-MM-YY (e.g., 01-05-26)
@@ -27,14 +45,20 @@ const convertInputToDbDate = (inputVal) => {
   if (match) {
     const [, d, m, y] = match;
     const fullYear = `20${y}`;
-    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    if (isValidCalendarDate(fullYear, m, d)) {
+      return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    }
+    return null;
   }
 
   // DDMMYYYY (e.g. 01052026)
   match = clean.match(/^(\d{2})(\d{2})(\d{4})$/);
   if (match) {
     const [, d, m, y] = match;
-    return `${y}-${m}-${d}`;
+    if (isValidCalendarDate(y, m, d)) {
+      return `${y}-${m}-${d}`;
+    }
+    return null;
   }
 
   // DDMMYY (e.g. 010526)
@@ -42,7 +66,10 @@ const convertInputToDbDate = (inputVal) => {
   if (match) {
     const [, d, m, y] = match;
     const fullYear = `20${y}`;
-    return `${fullYear}-${m}-${d}`;
+    if (isValidCalendarDate(fullYear, m, d)) {
+      return `${fullYear}-${m}-${d}`;
+    }
+    return null;
   }
 
   // Fallback: JS Date parser
@@ -52,7 +79,9 @@ const convertInputToDbDate = (inputVal) => {
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
       const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      if (isValidCalendarDate(y, m, d)) {
+        return `${y}-${m}-${d}`;
+      }
     }
   } catch {
     // Fallback parser failure, return null
@@ -104,6 +133,9 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
     const dbDate = convertInputToDbDate(dueDateInput);
     if (dbDate) {
       setDueDateInput(convertDbToInputDate(dbDate));
+      setError('');
+    } else if (dueDateInput) {
+      setError('Invalid date. Please enter a valid calendar date in DD-MM-YY format.');
     }
   };
 
@@ -117,7 +149,7 @@ export default function TaskForm({ onSubmit, editingTask, onCancel, presetDate }
 
     const dbDate = convertInputToDbDate(dueDateInput);
     if (dueDateInput && !dbDate) {
-      setError('Invalid date format. Please use DD-MM-YY (e.g. 13-06-26)');
+      setError('Invalid date. Please enter a valid calendar date in DD-MM-YY format.');
       return;
     }
 

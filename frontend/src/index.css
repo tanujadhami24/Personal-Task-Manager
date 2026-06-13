@@ -234,28 +234,16 @@ header {
   border-color: var(--card-border-hover);
 }
 
-/* Responsive Grid-Based Main Dashboard Layout */
+/* Main Layout Grid - Responsive 2-column layout on Desktop, stacked on Mobile */
 .app-main-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  gap: 24px;
   grid-template-areas:
     "dashboard"
     "calendar"
     "add-task"
     "tasks-container";
-  gap: 24px;
   align-items: start;
-  margin-bottom: 40px;
-}
-
-@media (min-width: 992px) {
-  .app-main-grid {
-    grid-template-columns: 380px 1fr;
-    grid-template-areas:
-      "dashboard calendar"
-      "add-task tasks-container";
-    gap: 32px;
-  }
 }
 
 .grid-area-dashboard {
@@ -274,13 +262,17 @@ header {
   grid-area: tasks-container;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
-.grid-area-dashboard > *,
-.grid-area-calendar > *,
-.grid-area-add-task > * {
-  margin-bottom: 0 !important;
+@media (min-width: 992px) {
+  .app-main-grid {
+    grid-template-columns: 380px 1fr;
+    grid-template-areas:
+      "dashboard calendar"
+      "add-task tasks-container";
+    gap: 32px;
+  }
 }
 
 /* Dashboard Statistics - iOS Pill Card Gradients (Stacked Vertically) */
