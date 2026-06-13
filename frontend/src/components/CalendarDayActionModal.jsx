@@ -4,12 +4,11 @@ export default function CalendarDayActionModal({
   isOpen,
   date,
   onClose,
-  onAddReminder,
   onSetAlarm,
   onSelectFilterDate,
   onPrefillTask
 }) {
-  const [activeForm, setActiveForm] = useState('menu'); // 'menu' | 'reminder' | 'alarm'
+  const [activeForm, setActiveForm] = useState('menu'); // 'menu' | 'alarm'
   const [title, setTitle] = useState('');
   const [alarmTime, setAlarmTime] = useState('');
   const [error, setError] = useState('');
@@ -26,17 +25,6 @@ export default function CalendarDayActionModal({
       year: 'numeric'
     });
   })();
-
-  const handleReminderSubmit = (e) => {
-    e.preventDefault();
-    if (!title.trim()) {
-      setError('Title is required');
-      return;
-    }
-    onAddReminder(title.trim(), date);
-    resetForm();
-    onClose();
-  };
 
   const handleAlarmSubmit = (e) => {
     e.preventDefault();
@@ -113,15 +101,6 @@ export default function CalendarDayActionModal({
 
               <button 
                 className="btn btn-secondary action-menu-item"
-                onClick={() => setActiveForm('reminder')}
-                style={{ justifyContent: 'flex-start', padding: '14px 18px', borderRadius: '14px', width: '100%', fontSize: '0.95rem' }}
-              >
-                <span style={{ marginRight: '12px', fontSize: '1.2rem' }}>🔔</span>
-                Add a quick Reminder
-              </button>
-
-              <button 
-                className="btn btn-secondary action-menu-item"
                 onClick={() => setActiveForm('alarm')}
                 style={{ justifyContent: 'flex-start', padding: '14px 18px', borderRadius: '14px', width: '100%', fontSize: '0.95rem' }}
               >
@@ -129,48 +108,6 @@ export default function CalendarDayActionModal({
                 Set a time-based Alarm
               </button>
             </div>
-          )}
-
-          {/* Quick Reminder Form */}
-          {activeForm === 'reminder' && (
-            <form onSubmit={handleReminderSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem', display: 'flex', alignItems: 'center' }}>
-                <span style={{ marginRight: '8px' }}>🔔</span> Add Quick Reminder
-              </h4>
-
-              <div className="form-group" style={{ margin: 0 }}>
-                <label htmlFor="reminder-title" style={{ fontSize: '0.85rem' }}>Reminder Title</label>
-                <input
-                  id="reminder-title"
-                  type="text"
-                  placeholder="e.g. Call client, Buy groceries..."
-                  value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    if (e.target.value.trim()) setError('');
-                  }}
-                  autoFocus
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: error ? '1px solid var(--accent-danger)' : '1px solid var(--card-border)',
-                    background: 'var(--input-bg)',
-                    color: 'var(--text-primary)'
-                  }}
-                />
-                {error && <span style={{ color: 'var(--accent-danger)', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>{error}</span>}
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginTop: '8px' }}>
-                <button type="button" className="btn btn-secondary" onClick={resetForm} style={{ flex: 1, padding: '10px' }}>
-                  Back
-                </button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 2, padding: '10px' }}>
-                  Save Reminder
-                </button>
-              </div>
-            </form>
           )}
 
           {/* Quick Alarm Form */}

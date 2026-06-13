@@ -189,20 +189,6 @@ export default function App() {
     }
   };
 
-  const handleAddReminder = async (title, dateStr) => {
-    try {
-      const newTask = await createTask({
-        title,
-        dueDate: dateStr,
-        type: 'reminder'
-      });
-      setTasks((prev) => [...prev, newTask]);
-      showToast('Reminder added successfully! 🔔');
-    } catch (err) {
-      showToast(err.message || 'Failed to add reminder', 'error');
-    }
-  };
-
   const handleSetAlarm = async (title, timeStr, dateStr) => {
     try {
       const newTask = await createTask({
@@ -536,7 +522,6 @@ export default function App() {
         isOpen={!!clickedCalendarDate}
         date={clickedCalendarDate}
         onClose={() => setClickedCalendarDate(null)}
-        onAddReminder={handleAddReminder}
         onSetAlarm={handleSetAlarm}
         onSelectFilterDate={setSelectedCalendarDate}
         onPrefillTask={handlePrefillTask}

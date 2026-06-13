@@ -150,43 +150,6 @@ describe('App React Component', () => {
     expect(screen.getByText('Submit Assignment')).toBeInTheDocument();
   });
 
-  it('allows adding a quick reminder from calendar action modal', async () => {
-    api.fetchTasks.mockResolvedValue(mockTasks);
-    api.createTask.mockResolvedValue({
-      id: 'reminder-1',
-      title: 'Call Mum',
-      dueDate: '2026-06-30',
-      type: 'reminder',
-      completed: false,
-      createdAt: '2026-06-13T12:00:00.000Z'
-    });
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
-    });
-
-    const calendarView = screen.getByTestId('calendar-view');
-    const activeDayCell = calendarView.querySelector('.current-month .day-active');
-    fireEvent.click(activeDayCell);
-
-    // Click "Add a quick Reminder"
-    fireEvent.click(screen.getByText('Add a quick Reminder'));
-
-    // Fill in reminder title
-    const input = screen.getByLabelText('Reminder Title');
-    fireEvent.change(input, { target: { value: 'Call Mum' } });
-
-    // Submit reminder
-    fireEvent.click(screen.getByText('Save Reminder'));
-
-    // Assert API called correctly
-    expect(api.createTask).toHaveBeenCalledWith({
-      title: 'Call Mum',
-      dueDate: '2026-06-30',
-      type: 'reminder'
-    });
-  });
 
   it('allows setting a time-based alarm from calendar action modal', async () => {
     api.fetchTasks.mockResolvedValue(mockTasks);
