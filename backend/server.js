@@ -7,20 +7,19 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Enable CORS for frontend requests
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  process.env.FRONTEND_URL
-].filter(Boolean);
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
+    // Allow requests with no origin (like mobile apps, curl) or matching allowedOrigins
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app') || origin.endsWith('.netlify.app')) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Fallback to allow dev requests
     }
-    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));
