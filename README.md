@@ -1,82 +1,220 @@
 # Personal Task Workspace
 
-A premium full-stack task management application built with **React (Vite)** on the frontend and **Node.js (Express)** on the backend. It features persistent storage, custom dark-mode glassmorphism styling, native HTML5 drag-and-drop custom ordering, due-date overdue tracking, and a comprehensive test suite.
+For this project, we chose the **Personal Task Manager / Todo App** exercise. We built a premium full-stack task management application designed to provide a highly interactive, responsive, and robust user experience. It features persistent storage, custom dark-mode glassmorphism styling, native HTML5 drag-and-drop custom ordering, due-date overdue tracking, calendar date actions, time-based beep alarms, and a comprehensive automated testing suite.
 
 ---
 
-## Technical Stack
+## 🔗 Live Demo Links
 
-- **Frontend**: React 19 (scaffolded with Vite), Vanilla CSS (Glassmorphism layout), Vitest + React Testing Library.
-- **Backend**: Node.js + Express, Jest + Supertest for integration testing.
-- **Storage**: Local JSON database (`backend/tasks-db.json`) for data persistence across restarts without requiring SQLite binary compile tools on Windows.
+- **Deployment Link**: Not currently hosted online. Please follow the instructions below to run the full stack locally.
 
 ---
 
-## Features
+## 🛠️ Tech Stack
 
-### 📋 Must-Have (Core CRUD)
-- **Create**: Add a task with a title (required), optional description, and optional due date. Form inputs validate client-side (title cannot be empty) and trigger visual red borders.
-- **Read**: Task lists are fetched and displayed. Sorted by creation date (newest first) by default.
-- **Update**: Toggle completion status using an animated custom checkbox. Edit title, description, or due date inside a focused modal popup.
-- **Delete**: Remove tasks. A custom overlay modal prompts the user to confirm the deletion (replacing generic browser confirm boxes).
-- **Filter**: Filter task list by status tabs (**All**, **Active**, **Completed**).
+We selected the following technologies for their simplicity, responsiveness, and portability:
 
-### 📈 Should-Have (UI & Diagnostics)
-- **Statistics Dashboard**: Live stats cards showing total tasks, active tasks, completed tasks, and a smooth gradient completion progress bar.
-- **Overdue Recognition**: Incomplete tasks with a due date in the past are highlighted with a soft red border and a glowing red "Overdue: Date" warning badge.
-- **Empty States**: A clean vector icon and prompt encouraging the user to add a task when the list is empty or filters have zero matches.
-
-### 🚀 Nice-to-Have & Bonuses
-- **Title Search**: Real-time filtering as you type in the search bar.
-- **Drag-and-Drop Reordering**: Drag cards from their left-side handles to custom order them. Rearranging automatically switches the sorting select to **Custom (Drag & Drop)** and saves the index sequence on the backend database.
-- **Data Persistence**: Tasks survive server restarts, stored locally in JSON format.
-- **Feedback Toasts**: Slide-in success and error toast banners at the bottom right.
+- **Frontend (React 19 & Vite)**:
+  - *React* was chosen to build dynamic, state-driven interactive components (like the calendar dropdowns, real-time list filtering, and drag handles).
+  - *Vite* is used as a fast, light-weight build tool and development server.
+  - *Vanilla CSS* provides custom responsive layouts, mesh gradients, glassmorphic elements, and micro-animations with zero build tools or configuration complexity.
+- **Backend (Node.js & Express)**:
+  - *Express* provides a clean, lightweight router to handle backend REST APIs for CRUD operations and reordering.
+- **Data Persistence (Local JSON File)**:
+  - We use a local JSON file (`backend/tasks-db.json`) for data persistence. This ensures the app runs out-of-the-box on any machine without requiring SQLite binary build compilers (which frequently fail on Windows developer environments) or external database servers.
+- **Testing (Jest, Supertest, Vitest, React Testing Library)**:
+  - We use *Jest + Supertest* for API integration testing, and *Vitest + RTL* for fast frontend component unit tests.
 
 ---
 
-## Installation & Setup
+## 🚀 How to Run Locally
 
-Make sure you have [Node.js](https://nodejs.org/) installed (v16+ recommended).
+Follow these exact steps to run the application locally. Make sure you have [Node.js](https://nodejs.org/) installed on your system.
 
-### 1. Install Dependencies
+### 1. Install All Dependencies
 From the root directory of the project, run:
 ```bash
-npm install
-npm run install-all
+npm install && npm run install-all
 ```
-*This installs root CLI packages (like `concurrently`) and then installs all frontend and backend node modules.*
+*This command installs the root helper orchestration tools (like `concurrently`) and recursively installs all node modules for both the `backend` and `frontend` subprojects.*
 
-### 2. Run the App
-Run both servers concurrently:
+### 2. Run the Application
+Start the frontend dev server and the backend API server concurrently:
 ```bash
 npm run dev
 ```
-- **Frontend** will launch on: `http://localhost:5173/`
+- **Frontend** will be hosted on: `http://localhost:5173/`
 - **Backend** will run on: `http://localhost:5000/`
 
-### 3. Run Tests
-You can run all backend integration tests and frontend component tests:
+### 3. Run the Automated Tests
+Run all backend integration tests and frontend component tests:
 ```bash
 npm run test
 ```
 
 ---
 
-## Evaluation Honesty: Honest Assessment & Reflections
+## 📖 API Documentation
 
-### What Works Perfectly
-1. **CRUD State sync**: State matches across forms, lists, toggles, and deletion. Refreshing the browser preserves the exact state.
-2. **Robust Testing**: 100% of integration endpoints are covered (including parameter validations and delete cascade indexes). Frontend tests mock calls to verify the dashboard and task items.
-3. **Vanilla CSS variables**: Avoids the build complexities of Tailwind/PostCSS configuration, allowing a bespoke, responsive glassmorphic styling system.
-4. **Resilient Portability**: By using a JSON database, the project is guaranteed to run instantly on any machine without database drivers compiling or failing.
+The backend API server runs on port `5000` and exposes the following endpoints:
 
-### Current Limitations
-1. **Concurrency**: The JSON file database reads and writes using async node file systems. While perfectly fine for a single user, this would hit lock-write conflicts under multi-user concurrent loads.
-2. **Subtasks**: Tasks cannot be nested (e.g. breaking down "Submit Assignment" into smaller checkboxes).
-3. **Advanced Reorder Animations**: The drag-and-drop uses HTML5 native APIs which switches the list indices, but lacks sliding card transition animations during the drag preview (e.g. using `framer-motion` or `dnd-kit`).
+### 1. Retrieve Tasks
+- **Method**: `GET`
+- **Path**: `/api/tasks`
+- **Request Body**: None
+- **Response Shape**:
+  ```json
+  [
+    {
+      "id": "task-1",
+      "title": "Buy Groceries",
+      "description": "Milk and Eggs",
+      "completed": false,
+      "dueDate": "2026-06-30",
+      "type": "task",
+      "alarmTime": null,
+      "createdAt": "2026-06-13T12:00:00.000Z",
+      "orderIndex": 0
+    }
+  ]
+  ```
 
-### What I Would Improve With More Time
-1. **Database Upgrade**: Switch to SQLite or MongoDB if expanding beyond a single-user local application.
-2. **Categories and Tags**: Allow users to assign tasks to custom color-coded categories (e.g., `Work`, `Personal`, `Fitness`).
-3. **Due Date Notifications**: Prompt desktop browser alerts when a task's due date is approaching or overdue.
-4. **JWT Authentication**: Introduce user signup, login sessions, and database isolation between multiple users.
+### 2. Create Task
+- **Method**: `POST`
+- **Path**: `/api/tasks`
+- **Request Body**:
+  ```json
+  {
+    "title": "Submit Assignment",
+    "description": "Math assignment",
+    "dueDate": "2026-06-15",
+    "type": "alarm",
+    "alarmTime": "15:30"
+  }
+  ```
+- **Response Shape**:
+  ```json
+  {
+    "id": "task-2",
+    "title": "Submit Assignment",
+    "description": "Math assignment",
+    "completed": false,
+    "dueDate": "2026-06-15",
+    "type": "alarm",
+    "alarmTime": "15:30",
+    "createdAt": "2026-06-13T13:20:00.000Z",
+    "orderIndex": 1
+  }
+  ```
+
+### 3. Update Task
+- **Method**: `PUT`
+- **Path**: `/api/tasks/:id`
+- **Request Body**:
+  ```json
+  {
+    "title": "Submit Assignment (Updated)",
+    "description": "Calculus module",
+    "completed": true,
+    "dueDate": "2026-06-16",
+    "type": "task",
+    "alarmTime": null
+  }
+  ```
+- **Response Shape**:
+  ```json
+  {
+    "id": "task-2",
+    "title": "Submit Assignment (Updated)",
+    "description": "Calculus module",
+    "completed": true,
+    "dueDate": "2026-06-16",
+    "type": "task",
+    "alarmTime": null,
+    "createdAt": "2026-06-13T13:20:00.000Z",
+    "orderIndex": 1
+  }
+  ```
+
+### 4. Bulk Reorder Tasks
+- **Method**: `PUT`
+- **Path**: `/api/tasks/reorder`
+- **Request Body**:
+  ```json
+  {
+    "taskIds": ["task-2", "task-1"]
+  }
+  ```
+- **Response Shape**:
+  ```json
+  {
+    "success": true
+  }
+  ```
+
+### 5. Delete Task
+- **Method**: `DELETE`
+- **Path**: `/api/tasks/:id`
+- **Request Body**: None
+- **Response Shape**:
+  ```json
+  {
+    "success": true,
+    "message": "Task deleted successfully"
+  }
+  ```
+
+---
+
+## 📂 Project Structure
+
+This monorepo separates backend servers and frontend assets:
+
+```text
+personal-task-manager/
+├── backend/
+│   ├── routes/
+│   │   └── tasks.js          # REST API endpoints for tasks
+│   ├── tests/
+│   │   └── server.test.js    # Integration tests using Jest & Supertest
+│   ├── db.js                 # Local file JSON database helper
+│   ├── server.js             # Express app & server initialization
+│   ├── tasks-db.json         # Persistent JSON database store
+│   └── package.json          # Backend npm package manifest
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # UI Components
+│   │   │   ├── CalendarDayActionModal.jsx  # Day-click action menu modal
+│   │   │   ├── CalendarView.jsx            # Month-based planner calendar grid
+│   │   │   ├── ConfirmationModal.jsx       # Modal replacing browser confirm()
+│   │   │   ├── Dashboard.jsx               # Stats counters and completion bar
+│   │   │   ├── FilterPanel.jsx             # Search, sort, and filter buttons
+│   │   │   ├── TaskForm.jsx                # Form creating and editing tasks
+│   │   │   └── TaskItem.jsx                # Individual task item card layout
+│   │   ├── utils/
+│   │   │   └── api.js        # API service function utilities
+│   │   ├── App.jsx           # Main React component, state orchestration
+│   │   ├── App.css           # App general UI overrides
+│   │   ├── index.css         # Color schemes, global variables, class system
+│   │   └── main.jsx          # React mount bootstrap file
+│   ├── tests/
+│   │   └── App.test.jsx      # Frontend Vitest suite
+│   ├── index.html            # Main SPA mount template
+│   └── package.json          # Frontend npm package manifest
+├── package.json              # Monorepo root package script runner
+└── README.md                 # Project documentation (this file)
+```
+
+---
+
+## 🔮 Next Steps
+
+### What was left out (Limitations)
+1. **Multi-User Partitioning**: Tasks are global. There is no user signup, login sessions, or private lists.
+2. **Concurrent Database Writes**: The JSON storage acts as a local single-user document. Under concurrent writes by multiple users, file locks would raise merge conflicts.
+3. **Animated List Transitions**: Reordering works instantly, but cards do not slide smoothly with custom drag animations (e.g. using `framer-motion` or `dnd-kit`).
+
+### Future Improvements
+1. **JWT User Authentication**: Implement signup/login forms and isolate task lists in the database per user ID.
+2. **Database Upgrade**: Swap the local JSON file database with MongoDB or SQLite for production deployments.
+3. **Advanced Categorization**: Let users assign color-coded labels (e.g., `Work`, `Personal`, `Fitness`) to filter task view feeds easily.
