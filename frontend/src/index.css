@@ -234,30 +234,48 @@ header {
   border-color: var(--card-border-hover);
 }
 
-/* Dashboard Statistics - iOS Pill Card Gradients */
-/* Split Layout for Side-by-Side Dashboard & Calendar */
-.top-split-layout {
+/* Responsive Unified Dashboard Grid Layout */
+.app-main-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 24px;
-  margin-bottom: 30px;
-  align-items: stretch;
+  grid-template-areas:
+    "dashboard"
+    "calendar"
+    "add-task"
+    "tasks-container";
 }
 
-@media (max-width: 768px) {
-  .top-split-layout {
-    grid-template-columns: 1fr;
-  }
+.grid-area-dashboard {
+  grid-area: dashboard;
 }
 
-.left-panel {
+.grid-area-calendar {
+  grid-area: calendar;
+}
+
+.grid-area-add-task {
+  grid-area: add-task;
+}
+
+.grid-area-tasks-container {
+  grid-area: tasks-container;
+}
+
+.tasks-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  gap: 24px;
 }
 
-.right-panel {
-  height: 100%;
+@media (min-width: 992px) {
+  .app-main-grid {
+    grid-template-columns: 380px 1fr;
+    grid-template-areas:
+      "dashboard calendar"
+      "add-task tasks-container";
+    align-items: start;
+    gap: 32px;
+  }
 }
 
 /* Dashboard Statistics - iOS Pill Card Gradients (Stacked Vertically) */

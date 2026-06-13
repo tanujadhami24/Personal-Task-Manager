@@ -377,105 +377,109 @@ export default function App() {
         </button>
       </header>
 
-      <main style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Split Top Layout: Dashboard Stats on Left, Calendar on Right */}
-        <div className="top-split-layout">
-          <div className="left-panel">
-            <Dashboard tasks={tasks} />
-          </div>
-          <div className="right-panel">
-            <CalendarView 
-              tasks={tasks}
-              selectedDate={selectedCalendarDate}
-              onSelectDate={setClickedCalendarDate}
-            />
-          </div>
+      <main className="app-main-grid">
+        {/* Dashboard component */}
+        <div className="grid-area-dashboard">
+          <Dashboard tasks={tasks} />
+        </div>
+
+        {/* Calendar component */}
+        <div className="grid-area-calendar">
+          <CalendarView 
+            tasks={tasks}
+            selectedDate={selectedCalendarDate}
+            onSelectDate={setClickedCalendarDate}
+          />
         </div>
 
         {/* Task Creator Form */}
-        <TaskForm key={taskFormPresetDate || 'new'} onSubmit={handleAddTask} presetDate={taskFormPresetDate} />
+        <div className="grid-area-add-task">
+          <TaskForm key={taskFormPresetDate || 'new'} onSubmit={handleAddTask} presetDate={taskFormPresetDate} />
+        </div>
 
-        {/* Search, Status Filtering and Sorting Bar */}
-        <FilterPanel 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          sortMode={sortMode}
-          setSortMode={setSortMode}
-        />
+        {/* Search, Status Filtering, Sorting, and Tasks List */}
+        <div className="grid-area-tasks-container tasks-container">
+          <FilterPanel 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            sortMode={sortMode}
+            setSortMode={setSortMode}
+          />
 
-        {/* Loading and Error states */}
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-            Loading tasks...
-          </div>
-        ) : error ? (
-          <div className="glass-panel" style={{ borderLeft: '3px solid var(--accent-danger)', padding: '16px', color: 'var(--accent-danger)' }}>
-            {error}
-            <button className="btn btn-secondary" onClick={loadTasks} style={{ marginTop: '12px', padding: '6px 12px', fontSize: '0.85rem' }}>
-              Retry Connection
-            </button>
-          </div>
-        ) : (
-          /* Task List Rendering */
-          <>
-            {selectedCalendarDate && (
-              <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderRadius: '16px', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                <span>📅 Showing tasks due on <strong>{
-                  (() => {
-                    const [year, month, day] = selectedCalendarDate.split('-').map(Number);
-                    return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                  })()
-                }</strong></span>
-                <button className="btn-text" onClick={() => setSelectedCalendarDate(null)} style={{ padding: '4px 8px', fontSize: '0.85rem', color: 'var(--accent-danger)' }}>
-                  Clear Date Filter
-                </button>
-              </div>
-            )}
-            <div className="task-list">
-              {processedTasks.length === 0 ? (
-              <div className="glass-panel empty-state">
-                <svg className="empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="9" y1="15" x2="15" y2="15"></line>
-                  <line x1="9" y1="11" x2="15" y2="11"></line>
-                  <line x1="9" y1="18" x2="11" y2="18"></line>
-                </svg>
-                <h3>No tasks found</h3>
-                <p>
-                  {searchQuery || statusFilter !== 'all' 
-                    ? 'Try adjusting your search criteria or filters.' 
-                    : 'Get started by creating your first task above!'}
-                </p>
-              </div>
-            ) : (
-              processedTasks.map((task, idx) => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  index={idx}
-                  onToggle={handleToggleCompleted}
-                  onEdit={setEditingTask}
-                  onDelete={handleDeleteTaskConfirm}
-                  onDragStart={handleDragStart}
-                  onDragOver={handleDragOver}
-                  onDragEnd={handleDragEnd}
-                  isDraggable={isDraggable}
-                />
-              ))
-            )}
+          {/* Loading and Error states */}
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+              Loading tasks...
+            </div>
+          ) : error ? (
+            <div className="glass-panel" style={{ borderLeft: '3px solid var(--accent-danger)', padding: '16px', color: 'var(--accent-danger)' }}>
+              {error}
+              <button className="btn btn-secondary" onClick={loadTasks} style={{ marginTop: '12px', padding: '6px 12px', fontSize: '0.85rem' }}>
+                Retry Connection
+              </button>
+            </div>
+          ) : (
+            /* Task List Rendering */
+            <>
+              {selectedCalendarDate && (
+                <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderRadius: '16px', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  <span>📅 Showing tasks due on <strong>{
+                    (() => {
+                      const [year, month, day] = selectedCalendarDate.split('-').map(Number);
+                      return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    })()
+                  }</strong></span>
+                  <button className="btn-text" onClick={() => setSelectedCalendarDate(null)} style={{ padding: '4px 8px', fontSize: '0.85rem', color: 'var(--accent-danger)' }}>
+                    Clear Date Filter
+                  </button>
+                </div>
+              )}
+              <div className="task-list">
+                {processedTasks.length === 0 ? (
+                  <div className="glass-panel empty-state">
+                    <svg className="empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="9" y1="15" x2="15" y2="15"></line>
+                      <line x1="9" y1="11" x2="15" y2="11"></line>
+                      <line x1="9" y1="18" x2="11" y2="18"></line>
+                    </svg>
+                    <h3>No tasks found</h3>
+                    <p>
+                      {searchQuery || statusFilter !== 'all' 
+                        ? 'Try adjusting your search criteria or filters.' 
+                        : 'Get started by creating your first task above!'}
+                    </p>
+                  </div>
+                ) : (
+                  processedTasks.map((task, idx) => (
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      index={idx}
+                      onToggle={handleToggleCompleted}
+                      onEdit={setEditingTask}
+                      onDelete={handleDeleteTaskConfirm}
+                      onDragStart={handleDragStart}
+                      onDragOver={handleDragOver}
+                      onDragEnd={handleDragEnd}
+                      isDraggable={isDraggable}
+                    />
+                  ))
+                )}
 
-            {/* Visual indicator warning if dragging is disabled due to active filters */}
-            {sortMode === 'custom' && !isDraggable && (
-              <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                💡 Drag-and-drop sorting is disabled while active filters or search queries are applied.
+                {/* Visual indicator warning if dragging is disabled due to active filters */}
+                {sortMode === 'custom' && !isDraggable && (
+                  <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                    💡 Drag-and-drop sorting is disabled while active filters or search queries are applied.
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </main>
 
       {/* Focused Edit Modal */}
